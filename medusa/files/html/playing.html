@@ -1,0 +1,228 @@
+{% extends "info.html" %}
+
+{% block playing %}
+
+{% if receiver %}
+
+    <script>
+
+        // Controls the switching of option menus.
+        function toggle_options()
+        {
+            var display_status = $(".main_advanced_options").css("display");
+
+            if (display_status == "none")
+            {
+                $(".main_basic_options").css("display", "none");
+                $(".main_advanced_options").css("display", "inherit");
+                $(".main_track_selection").html("");
+                $(".main_toggle_options").html("Basic Options");
+            }
+
+            else
+            {
+                $(".main_basic_options").css("display", "inherit");
+                $(".main_advanced_options").css("display", "none");
+                $(".main_track_selection").html("");
+                $(".main_toggle_options").html("Advanced Options");
+            };
+        };
+
+        // Brings up and fills track (audio or subtitle) selection.
+        function toggle_track_selection(track_selection)
+        {
+            var url = "/playing/tracks/{{ receiver }}/" + track_selection
+
+            $.get(url, function(data)
+            {
+                $(".main_advanced_options").css("display", "none");
+                $(".main_track_selection").html(data);
+                $(".main_toggle_options").html("Advanced Options");
+            });
+        };
+
+        // Updates the media time elapsed.
+        function update_time()
+        {
+            $.get("/playing/time/{{ receiver }}", function(data)
+            {
+                var info = data.split(" ")
+
+                var elapsed_time = info[0], total_time = info[1]
+
+                if (elapsed_time == "-1")
+                {
+                    window.location.reload();
+                }
+
+                else
+                {
+                    var time = "";
+
+                    time += elapsed_time;
+                    time += " minutes elapsed out of ";
+                    time += total_time;
+                    time += ".";
+
+                    $(".main_time").html(time);
+                };
+            });
+        };
+
+        // Performs an action (control) in the background.
+        function perform_action(action)
+        {
+            $.get("/action/{{ receiver }}/" + action);
+
+            update_time();
+        };
+
+        $(document).ready(function()
+        {
+            // Wait .5 seconds to get first time information.
+            var initial_time = setTimeout(function()
+            {
+                update_time();
+            }, 500);
+
+            // Refresh time elapsed every 5 seconds.
+            var refresh_time = setInterval(function()
+            {
+                update_time();
+            }, 5000);
+        });
+
+    </script>
+
+    <div class="main_content">
+
+        <div class="main_time">
+            Determining time elapsed.
+        </div>
+
+    </div>
+
+    <div class="main_basic_options">
+
+        <div class="main_content">
+
+            <a class="main_button main_button_wide"
+               href="/action/{{ receiver }}/pause">
+
+            {% if data["status"] == "paused" %}
+                Resume
+            {% else %}
+                Pause
+            {% endif %}
+
+            </a>
+
+        </div>
+
+        <div class="main_content">
+
+            <a class="main_button main_settings" href="#"
+               onclick="perform_action('volume_down');">
+                Volume -
+            </a>
+
+            <a class="main_button main_settings right" href="#"
+               onclick="perform_action('volume_up');">
+                Volume +
+            </a>
+
+        </div>
+
+        <div class="main_content">
+
+            <a class="main_button main_button_bottom" href="#"
+               onclick="perform_action('rewind');">
+                Rewind
+            </a>
+
+            <a class="main_button main_button_bottom right"
+               href="/action/{{ receiver }}/stop">
+                Stop
+            </a>
+
+        </div>
+    
+    </div>
+
+    <div class="main_advanced_options">
+
+        <div class="main_content">
+
+            <a class="main_button main_settings" href="#"
+               onclick="toggle_track_selection('subtitle');">
+                Subtitle Track
+            </a>
+
+            <a class="main_button main_settings right" href="#"
+               onclick="toggle_track_selection('audio');">
+                Audio Track
+            </a>
+
+        </div>
+
+        <div class="main_content">
+
+            <a class="main_button main_settings"
+               href="/action/{{ receiver }}/reset">
+                Restart
+            </a>
+
+            <a class="main_button main_settings right"
+               href="/action/{{ receiver }}/mute">
+                Mute
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="main_track_selection"></div>
+
+    <div class="main_content">
+
+        <a class="main_toggle_options" href="#"
+           onclick="toggle_options();">
+            Advanced Options
+        </a>
+
+    </div>
+
+{% else %}
+
+    {% if active %}
+
+        {% for receiver in receivers %}
+
+            {% if receiver["status"] %}
+
+                <div class="main_content">
+
+                    <a class="main_button main_button_wide"
+                       href="/playing/{{ receiver["host"] }}">
+                        {{ receiver["name"] }}
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="main_content">
+
+            <div class="main_text">No active Receivers found.</div>
+
+        </div>
+
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}

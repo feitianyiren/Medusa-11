@@ -1,0 +1,89 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+{% if directory == "film" %}
+
+    <div class="main_content">
+
+        <div class="main_title">{{ data["title"] }}</div>
+
+        <span>{{ data["director"] }}</span>
+
+        <div class="right">{{ data["year"] }}</div>
+
+    </div>
+
+{% elif directory == "television" %}
+
+    <div class="main_content">
+
+        <div class="main_title">{{ data["title"] }}</div>
+
+        <a href='/browse/{{ directory }}/{{ data["show"] }}/{{ data["season"] }}'>
+            {{ data["show"] }}
+        </a>
+
+        <div class="right">
+            S{{ data["season_padded"] }}E{{ data["episode_padded"] }}
+        </div>
+
+    </div>
+
+{% elif directory == "recent" %}
+
+    <div class="main_content">
+        <div class="main_title">{{ data["media_info" ]}}</div>
+    </div>
+
+{% elif directory == "disc" %}
+
+    <div class="main_content">
+        <div class="main_title">Disc</div>
+    </div>
+
+
+{% endif %}
+
+    {% block playing %}
+
+    {% if data["date_played"] %}
+
+        <div class="main_content">
+
+            <div class="main_time">
+                Last played on {{ data["date_played"] }}.
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    {% if receivers[0] %}
+
+        {% for receiver in receivers %}
+
+            <div class="main_content">
+
+                <a class="main_button main_button_wide"
+                   href="/playing/{{ receiver["host"] }}/{{ directory }}/{{ data["media_info"] }}">
+
+                {% if data["time_viewed"] %}
+                    Resume
+                {% else %}
+                    Play
+                {% endif %}
+
+                    in {{ receiver["name"] }}
+
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    {% endblock %}
+
+{% endblock %}

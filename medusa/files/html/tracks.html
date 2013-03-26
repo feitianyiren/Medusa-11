@@ -1,0 +1,24 @@
+{% if tracks[0] %}
+
+    {% for track in tracks %}
+
+        <div class="main_content">
+
+            <a class="main_button main_button_wide"
+               href="/action/{{ receiver }}/set_{{ track_selection }}_track/{{ track[0] }}">
+                {{ track[1] }}
+            </a>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <div class="main_content">
+
+        <div class="main_text">No {{ track_selection }} tracks found.</div>
+
+    </div>
+
+{% endif %}

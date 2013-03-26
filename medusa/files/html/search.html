@@ -1,0 +1,116 @@
+{% if directory == "film" %}
+
+    {% for info in data %}
+
+        <a class="result"
+		   href='/info/{{ directory }}/{{ info["media_info"] }}'>
+            {{ info["title"] }}
+        </a>
+
+    {% endfor %}
+
+{% elif directory == "television" %}
+
+    {% if show %}
+
+        {% if season %}
+		
+            <a class="result result_title"
+               href="/browse/television/{{ show }}">
+                {{ show }}
+                <div class="right">
+                    Season {{ season }}
+                </div>
+            </a>
+
+            {% for info in data %}
+
+                <a class="result"
+                   href='/info/{{ directory }}/{{ info["media_info"] }}'>
+                    {{ info["episode"] }}. {{ info["title"] }}
+                </a>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="result result_title">{{ show }}</div>
+	
+            {% for info in data %}
+
+                <a class="result"
+                   href='/browse/{{ directory }}/{{ show }}/{{ info["season"] }}'>
+                    Season {{ info["season"] }}
+                </a>
+
+            {% endfor %}
+
+        {% endif %}
+	
+    {% else %}
+
+        {% for info in data %}
+
+            <a class="result"
+               href='/browse/{{ directory }}/{{ info["show"] }}'>
+                {{ info["show"] }}
+            </a>
+
+        {% endfor %}
+	
+    {% endif %}
+
+{% elif directory == "music" %}
+
+    <a class="result" href="/">No music here yet.</a>
+
+{% elif directory == "recent" %}
+
+    {% for info in data %}
+
+        <a class="result"
+           href="/info/recent/{{ info[1] }}">
+            {{ info[1] }}
+        </a>
+
+    {% endfor %}
+
+{% else %}
+
+    <div class="main_content">
+
+        <a class="main_button main_button_wide"
+           href="/browse/film">
+            Film
+        </a>
+
+    </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_button_wide"
+           href="/browse/television">
+            Television
+        </a>
+
+    </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_button_wide"
+           href="/browse/music">
+            Music
+        </a>
+
+    </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_button_wide"
+           href="/info/disc/disc">
+            Disc
+        </a>
+
+    </div>
+
+{% endif %}
