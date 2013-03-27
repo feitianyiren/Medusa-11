@@ -8,20 +8,20 @@ It uses the Werkzeug based microframework Flask to serve pages.
 
 Through this interface the user is able to browse all of their database
 indexed media in addition to a dynamically generated listing of new and
-temporarily downloaded media.
+temporarily downloaded/stored media files.
 
-Media playback can be started and controlled through this interface. The
+Media playback can be started and controlled through the web interface. The
 Webmote communicates user requests through to the appropriate Receiver using
 socket connections.
 
-Paths for the Downloads and Temporary directories can be optionally passed
+Paths to the Downloads and Temporary directories can be optionally passed
 through using '-d' and '-t' command-line arguments.
 
-Currently supports Film and Television directories. Music not yet
+Currently supports Film and Television directories, with Music not yet
 implemented. All directories are handled separately due to their discrepant
 file naming schemes and folder structures.
-
 """
+
 import os.path
 from time import (strptime,
                   strftime)
@@ -34,7 +34,7 @@ from medusa import (logger as log,
                     databaser,
                     communicator)
 
-# Get Flask ready to route.
+# Get Flask ready to route our pages.
 #------------------------------------------------------------------------------
 
 web = flask.Flask(__name__,
@@ -53,6 +53,7 @@ communicate = communicator.Communicate()
 
 def main():
     """Check Receivers, launch web server."""
+
     log.write("Checking Receivers.")
 
     with database:
@@ -76,8 +77,8 @@ def check_alive_receivers(receivers):
     entry.
 
     Return a list of all alive (responding) Receivers.
-
     """
+
     if not receivers:
         return []
 
@@ -104,15 +105,14 @@ def check_alive_receivers(receivers):
 
     return alive_receivers
 
-
 def count_active_receivers():
     """Return a count of how many Receivers are listed as being active
     (having media loaded) in the database.
 
     The returned Receiver hostname is only relevant when the active
     Receiver count is one. Otherwise it is never used.
-
     """
+
     active_count = 0
 
     active_receiver = None
@@ -134,12 +134,11 @@ def count_active_receivers():
 
     return active_count, active_receiver
 
-
 def begin_playing_receiver(receiver, directory, media_info):
     """Update the database for a Receiver with information on the newly
     playing media, and update the play time history for that media.
-
     """
+
     database.update_receiver_media(receiver,
                                    directory,
                                    media_info)
@@ -154,16 +153,14 @@ def begin_playing_receiver(receiver, directory, media_info):
                                   media_info,
                                   0)
 
-
 def clear_receiver(receiver):
     """Clear the Receiver's active status from the Receiver database by
     updating it to have empty entries in the relevant columns.
-
     """
+
     database.update_receiver_media(receiver, "", "")
 
     database.update_receiver_status(receiver, "")
-
 
 def format_time(time):
     """Convert the time into a user friendly string."""
@@ -181,8 +178,8 @@ def api(action, receiver, option = None):
     or exit.
 
     Receivers therefore do not require direct database access.
-
     """
+
     with database:
         if action == "insert":
             if not database.check_receiver(receiver):
@@ -205,7 +202,6 @@ def api(action, receiver, option = None):
     # The returned string is ignored, but cannot be null.
     return "0"
 
-
 @web.route("/")
 def index_page():
     """Return a redirect from the Index page.
@@ -213,8 +209,8 @@ def index_page():
     If a single Receiver is active, redirect to its Playing (control) page.
     If multiple Receivers are active, redirect to the Receiver page to choose.
     If no Receivers are active, redirect to the Browse page.
-
     """
+
     bookmark = False
 
     if bookmark:
@@ -232,7 +228,6 @@ def index_page():
     else:
         return flask.redirect("/browse")
 
-
 @web.route("/browse")
 @web.route("/browse/<directory>")
 def browse_page(directory = None):
@@ -244,11 +239,10 @@ def browse_page(directory = None):
     Contains variables such as directory (Film, Recent, etc) or
     sub-directory (Show, Artist, etc). This is to help the page request and
     format its dynamic content.
-
     """
+
     return flask.render_template("browse.html",
                                  directory = directory)
-
 
 @web.route("/browse/television/<show>")
 @web.route("/browse/television/<show>/<season>")
@@ -260,7 +254,6 @@ def browse_television_page(show, season = None):
                                  show = show,
                                  season = season)
 
-
 @web.route("/browse/music/<artist>")
 @web.route("/browse/music/<artist>/<album>")
 def browse_music_page(artist, album = None):
@@ -271,16 +264,14 @@ def browse_music_page(artist, album = None):
                                  artist = artist,
                                  album = album)
 
-
 @web.route("/recent")
 def recent_page():
     """Return a redirect to the Browse Recent page.
 
     This exists for URL naming convention consistency.
-
     """
-    return flask.redirect("/browse/recent")
 
+    return flask.redirect("/browse/recent")
 
 @web.route("/search")
 def search_page():
@@ -288,10 +279,9 @@ def search_page():
 
     This displays a list of base directories (Film, Television, etc), which
     are hard-coded into the HTML at present.
-
     """
-    return flask.render_template("search.html")
 
+    return flask.render_template("search.html")
 
 @web.route("/search/recent")
 def search_recent_page():
@@ -309,8 +299,8 @@ def search_recent_page():
 
     Not yet implemented: Limit files to only those modified in the last three
     days, and include media entered into the database within the last three days.
-
     """
+
     data = []
 
     listing = lister.Listing()
@@ -335,7 +325,6 @@ def search_recent_page():
                                  directory = "recent",
                                  data = data)
 
-
 @web.route("/search/film")
 @web.route("/search/film/<term>")
 def search_film_page(term = ""):
@@ -347,8 +336,8 @@ def search_film_page(term = ""):
 
     The HTML page knows how to format the columns correctly straight from the
     database.
-
     """
+
     data = []
 
     # Select all database entries by using a wild card.
@@ -366,7 +355,6 @@ def search_film_page(term = ""):
                                  directory = "film",
                                  data = data)
 
-
 @web.route("/search/television")
 @web.route("/search/television/<show>")
 @web.route("/search/television/<show>/<season>")
@@ -375,8 +363,8 @@ def search_television_page(show = None, season = None):
 
     Contains a full list of shows, seasons or episodes, depending on
     which level of sub-directory the user has browsed to.
-
     """
+
     data = []
 
     with database:
@@ -395,7 +383,6 @@ def search_television_page(show = None, season = None):
                                  season = season,
                                  data = data)
 
-
 @web.route("/search/music")
 @web.route("/search/music/<artist>")
 @web.route("/search/music/<artist>/<album>")
@@ -403,8 +390,8 @@ def search_music_page(artist = None, album = None):
     """Return the Search Music result page.
 
     Feature not yet implemented.
-
     """
+
     data = []
 
     return flask.render_template("search.html",
@@ -412,7 +399,6 @@ def search_music_page(artist = None, album = None):
                                  artist = artist,
                                  album = album,
                                  data = data)
-
 
 @web.route("/info/<directory>/<media_info>")
 def info_page(directory, media_info):
@@ -426,8 +412,8 @@ def info_page(directory, media_info):
 
     In the case of Recent media the only information gathered is the already
     passed title and if it has been played before.
-
     """
+
     data = {}
     receivers = []
 
@@ -455,7 +441,6 @@ def info_page(directory, media_info):
                                  data = data,
                                  receivers = receivers)
 
-
 @web.route("/playing")
 @web.route("/playing/<receiver>")
 def playing_page(receiver = None):
@@ -469,8 +454,8 @@ def playing_page(receiver = None):
 
     For a Recent media file, 'media_info' is the filename. For indexed media
     files it is the database entry ID.
-
     """
+
     directory = None
     data = None
     receivers = None
@@ -542,7 +527,6 @@ def playing_page(receiver = None):
                                  receivers = receivers,
                                  active = active)
 
-
 @web.route("/playing/<receiver>/<directory>/<media_info>")
 def playing_start_page(receiver, directory, media_info):
     """Update the database for the Receiver with the basic media information,
@@ -559,8 +543,8 @@ def playing_start_page(receiver, directory, media_info):
     through to the selected Receiver as a tuple in a tuple.
 
     Return a redirect to the Receiver Playing page to begin monitoring.
-
     """
+
     with database:
         # Select all media information from the database to build filename.
         _query = "select_%s" % (directory)
@@ -605,15 +589,14 @@ def playing_start_page(receiver, directory, media_info):
 
     return flask.redirect("/playing/%s" % (receiver))
 
-
 @web.route("/playing/time/<receiver>")
 def playing_time_page(receiver):
     """Return the Playing Time page.
 
     Contains the elapsed time and total duration. It is requested by JQuery
     and used to provide live monitoring of media on the Playing page.
-
     """
+
     communicate.receiver_hostname = receiver
 
     with communicate:
@@ -630,7 +613,6 @@ def playing_time_page(receiver):
                                  time_elapsed = time_elapsed,
                                  time_total = time_total)
 
-
 @web.route("/playing/tracks/<receiver>/<track_selection>")
 def playing_tracks_page(receiver, track_selection):
     """Return the Playing Tracks page.
@@ -638,8 +620,8 @@ def playing_tracks_page(receiver, track_selection):
     Contains a list of either all audio or all subtitle tracks. It is
     requested by JQuery and allows the user to change tracks inside the
     Playing page.
-
     """
+
     tracks = []
 
     # The action can be to get either audio or subtitle tracks.
@@ -672,7 +654,6 @@ def playing_tracks_page(receiver, track_selection):
                                  track_selection = track_selection,
                                  tracks = tracks)
 
-
 @web.route("/action/<receiver>/<action>")
 @web.route("/action/<receiver>/<action>/<option>")
 def playing_action_page(receiver, action, option = None):
@@ -687,8 +668,8 @@ def playing_action_page(receiver, action, option = None):
     seconds must have elapsed, and more than five percent of playback remains.
     The goal here is to avoid files resuming when they have reached their
     end credit sequence, or only just begun.
-
     """
+
     communicate.receiver_hostname = receiver
 
     with database:
@@ -736,14 +717,13 @@ def playing_action_page(receiver, action, option = None):
 
     return flask.redirect(redirect_url)
 
-
 @web.route("/viewed")
 def viewed_page():
     """Return the Viewed page.
 
     Contains a short list of the most recently played media.
-
     """
+
     data = []
 
     with database:
@@ -788,8 +768,8 @@ def admin_page(receiver = None):
     'restart'.
 
     Feature not yet complete.
-
     """
+
     data = {}
     receivers = []
 
@@ -807,27 +787,29 @@ def admin_page(receiver = None):
                                  data = data,
                                  receivers = receivers)
 
+# Parse command-line arguments.
+#------------------------------------------------------------------------------
+
+def parse_arguments():
+    help = """Launches the Webmote server. Both arguments are optional but
+              provide functionality to the 'Recent' page."""
+
+    parser = argparse.ArgumentParser(description = help)
+
+    parser.add_argument("-d", "--downloads_mount",
+                        action = "store", type = unicode, default = None)
+    parser.add_argument("-t", "--temporary_mount",
+                        action = "store", type = unicode, default = None)
+
+    return parser.parse_args()
+
 # Run.
 #------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     log.write("Webmote launched.")
 
-    help = """Launches the Webmote server. Both arguments are optional but
-              provide functionality for the 'Recent' page."""
-
-    parser = argparse.ArgumentParser(description = help)
-
-    parser.add_argument("-d", "--downloads_mount",
-                        action = "store",
-                        type = unicode,
-                        default = None)
-    parser.add_argument("-t", "--temporary_mount",
-                        action = "store",
-                        type = unicode,
-                        default = None)
-
-    options = parser.parse_args()
+    options = parse_arguments()
 
     main()
 
