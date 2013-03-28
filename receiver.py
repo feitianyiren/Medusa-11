@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""Receiver: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
+
+Receivers instructions from a Webmote and actions them using the libVLC API.
+"""
 
 import os
 from time import sleep
@@ -22,6 +26,7 @@ if config.platform == "win32":
                           VK_TAB,
                           KEYEVENTF_KEYUP)
 
+    # Fixes unicode character shell support in Windows.
     def _str_to_bytes(string):
         if isinstance(string, unicode):
             return string.encode("utf-8")
@@ -31,9 +36,18 @@ if config.platform == "win32":
 
     vlc.str_to_bytes = _str_to_bytes
 
+# Initialize communication import.
+#------------------------------------------------------------------------------
+
 communicate = communicator.Communicate()
 
+# Main.
+#------------------------------------------------------------------------------
+
 def main():
+    """Listen in a loop for actions from the Webmote and control media
+    playback as instructed."""
+
     control = Control()
 
     communicate.listen()
@@ -68,7 +82,14 @@ def main():
 
             continue
 
+# Watcher sub-process.
+#------------------------------------------------------------------------------
+
 def media_watcher():
+    """Spawn a sub-process that keeps in communication with the Receiver
+    to ensure playback ends punctually and the next item in the queue begins.
+    """
+
     log.write("Watcher launched.")
 
     communicate.receiver_hostname = config.hostname
@@ -96,7 +117,12 @@ def media_watcher():
 
         sleep(time_sleep)
 
+# Classes.
+#------------------------------------------------------------------------------
+
 class Api(object):
+    """Communicate with the Webmote's web API."""
+
     def __init__(self):
         self.base_url = "http://%s:7000/api/" % (options.webmote)
 
@@ -112,12 +138,15 @@ class Api(object):
 
         requests.get(url)
 
+
 class Media(object):
+    """Find and format a path to the media file."""
+
     def __init__(self, directory, media_info):
-        self.directory = directory
+        self.directory  = directory
         self.media_info = media_info
         self.media_file = ""
-        self.parts = []
+        self.parts      = []
 
     def get_media_file(self, media_partial):
         if media_partial == "disc":
@@ -148,7 +177,9 @@ class Media(object):
             self.find_media_files()
 
     def find_disc_type(self):
-	check = glob.glob("/media/*/VIDEO_TS")
+        """Determine between either a DVD or BD disc in the drive."""
+
+        check = glob.glob("/media/*/VIDEO_TS")
 
         if check:
             return "dvd:///dev/dvd"
@@ -175,12 +206,15 @@ class Media(object):
                                        self.directory,
                                        self.media_info))
 
+
 class Control(object):
+    """Control the media playback through the libVLC API."""
+
     def __init__(self):
         self.action = ""
         self.option = ""
-        self.state = ""
-        self.queue = []
+        self.state  = ""
+        self.queue  = []
 
         self.instance = vlc.Instance("--no-xlib")
 
@@ -283,7 +317,7 @@ class Control(object):
         if target_volume > 200:
             target_volume = 200
 
-	log.write("Setting volume to '%s'." % (target_volume))
+        log.write("Setting volume to '%s'." % (target_volume))
 
         self.media_player.audio_set_volume(target_volume)
 
@@ -295,7 +329,7 @@ class Control(object):
         if current_volume < 30:
             target_volume = 10
 
-	log.write("Setting volume to '%s'." % (target_volume))
+        log.write("Setting volume to '%s'." % (target_volume))
 
         self.media_player.audio_set_volume(target_volume)
 
@@ -335,41 +369,40 @@ class Control(object):
             keybd_event(VK_TAB, 0x8f, KEYEVENTF_KEYUP, 0)
             keybd_event(VK_MENU, 0xb8, KEYEVENTF_KEYUP, 0)
 
+# Parse command-line arguments.
+#------------------------------------------------------------------------------
+
+def parse_arguments():
+    help = """The Downloads and Temporary mounts are optional. They provide
+              functionality for the 'Recent' page."""
+
+    parser = argparse.ArgumentParser(description = help)
+
+    parser.add_argument("-w", "--webmote",
+                        action = "store", required = True,
+                        help = "The hostname of the Webmote server.")
+    parser.add_argument("-n", "--name",
+                        action = "store", required = True,
+                        help = "A descriptive name for this Receiver.")
+    parser.add_argument("-s", "--source_mount",
+                        action = "store", type = unicode, required = True,
+                        help = "The location of all indexed media.")
+    parser.add_argument("-d", "--downloads_mount",
+                        action = "store", type = unicode,
+                        default = None)
+    parser.add_argument("-t", "--temporary_mount",
+                        action = "store", type = unicode,
+                        default = None)
+
+    return parser.parse_args()
+
+# Run.
+#------------------------------------------------------------------------------
+
 if __name__ == "__main__":
     log.write("Receiver launched.")
 
-    parser = argparse.ArgumentParser(description = """The Downloads and
-                                     Temporary mounts are optional. They
-                                     provide functionality for the 'Recent'
-                                     page.""")
-
-    parser.add_argument("-w", "--webmote",
-                        action = "store",
-                        required = True,
-                        help = "The hostname of the Webmote server.")
-
-    parser.add_argument("-n", "--name",
-                        action = "store",
-                        required = True,
-                        help = "A descriptive name for this Receiver.")
-
-    parser.add_argument("-s", "--source_mount",
-                        action = "store",
-                        type = unicode,
-                        required = True,
-                        help = "The location of all indexed media.")
-
-    parser.add_argument("-d", "--downloads_mount",
-                        action = "store",
-                        type = unicode,
-                        default = None)
-
-    parser.add_argument("-t", "--temporary_mount",
-                        action = "store",
-                        type = unicode,
-                        default = None)
-
-    options = parser.parse_args()
+    options = parse_arguments()
 
     api = Api()
 
@@ -384,3 +417,4 @@ if __name__ == "__main__":
         communicate.close_connection()
 
         log.write("Receiver exited.")
+

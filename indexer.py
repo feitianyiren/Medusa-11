@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """Indexer: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
 The Indexer traverses the specified directories (Film, Television, etc)
@@ -8,7 +7,6 @@ extension criteria, as specified in the configger.
 
 It then indexes found media into the database following a naming convention,
 and removes database entries that no longer exist on the harddrive.
-
 """
 
 import argparse
@@ -17,27 +15,31 @@ from medusa import (logger as log,
                     lister,
                     databaser)
 
+# Parse command-line arguments.
+#------------------------------------------------------------------------------
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-d", "--directories",
+                        action = "append", required = True,
+                        help = "Film, Television, or Music.")
+    # The path is taken as Unicode to support foreign characters.
+    parser.add_argument("-s", "--source_mount",
+                        action = "store", type = unicode, required = True)
+
+    return parser.parse_args()
+
+# Main.
+#------------------------------------------------------------------------------
+
 def main():
     """Parses command-line arguments. Lists directories and adds new files to
     the database. Checks for database entries that no longer exist on the
     harddrive and deletes them.
-
     """
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-d", "--directories",
-                        action = "append",
-                        required = True,
-                        help = "Film, Television, etc.")
-
-    # The path is taken as Unicode to support foreign characters.
-    parser.add_argument("-s", "--source_mount",
-                        action = "store",
-                        type = unicode,
-                        required = True)
-
-    options = parser.parse_args()
+    options = parse_arguments()
 
     database = databaser.Database()
 
@@ -53,6 +55,9 @@ def main():
         listing.list_directories_recursive([directory])
 
         index.index_all(listing.files)
+
+# The Indexer.
+#------------------------------------------------------------------------------
 
 class Index(object):
     """Inserts and Deletes media into/from the database."""
@@ -70,7 +75,6 @@ class Index(object):
     def index_all(self, index_list):
         """Inserts all media in the index list into the database, unless
         it already exists in the database.
-
         """
 
         with self.database:
@@ -119,9 +123,13 @@ class Index(object):
             if "%s/%s/" % (self.options.source_mount, drc) in directory:
                 return drc
 
+# Run.
+#------------------------------------------------------------------------------
+
 if __name__ == "__main__":
     log.write("Indexer launched.")
 
     main()
 
     log.write("Indexer exited.")
+
