@@ -237,12 +237,11 @@ class Database(object):
         return data
 
     def select_disc(self, media_info):
-	date_played = None
+        date_played = None
+        time_viewed = None
 
-	time_viewed = None
-
-	data = {"date_played": date_played,
-		"time_viewed": time_viewed}
+        data = {"date_played": date_played,
+                "time_viewed": time_viewed}
 
         return data
 
@@ -265,7 +264,7 @@ class Database(object):
 
         try:
             # 'title' and 'director' are decoded for UTF-8.
-            row["title"] = self.decode_string(row["title"])
+            row["title"]    = self.decode_string(row["title"])
             row["director"] = self.decode_string(row["director"])
 
         except TypeError:
