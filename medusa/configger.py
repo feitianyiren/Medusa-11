@@ -10,7 +10,8 @@ video_extensions = {"asf",
                     "mkv",
                     "mp4",
                     "mpg",
-                    "ogm"}
+                    "ogm",
+                    "m2ts"}
 
 audio_extensions = {"mp3", "m4a"}
 

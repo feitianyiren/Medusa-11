@@ -11,12 +11,14 @@ Viewed: Contains information on when media was last played and time elapsed.
 Film, Television: Contain information on individual media.
 
 Music is yet to be implemented.
-
 """
 
 import sqlite3
 
 import configger as config
+
+# The SQLite database.
+#------------------------------------------------------------------------------
 
 class Database(object):
     def __init__(self):
@@ -69,7 +71,6 @@ class Database(object):
         database.
 
         Returns either True or False.
-
         """
 
         self.cursor.execute("""
@@ -223,12 +224,10 @@ class Database(object):
         # Not all Recent media will have a database entry yet.
         try:
             date_played = row["date_played"]
-
             time_viewed = row["time_viewed"]
 
         except TypeError:
             date_played = None
-
             time_viewed = None
 
         data = {"date_played": date_played,
@@ -293,9 +292,9 @@ class Database(object):
 
         try:
             # 'season' and 'episode' also return two padded versions.
-            row["title"] = self.decode_string(row["title"])
-            row["show"] = self.decode_string(row["show"])
-            row["season_padded"] = str(row["season"]).zfill(2)
+            row["title"]          = self.decode_string(row["title"])
+            row["show"]           = self.decode_string(row["show"])
+            row["season_padded"]  = str(row["season"]).zfill(2)
             row["episode_padded"] = str(row["episode"]).zfill(2)
 
         except TypeError:
@@ -309,7 +308,9 @@ class Database(object):
         self.cursor.execute("""
                             SELECT id as media_info,
                             title,
-                            year
+                            director,
+                            year,
+                            extension
                             FROM film
                             WHERE title like ?
                             OR title_clean like ?
@@ -324,7 +325,9 @@ class Database(object):
         rows = self.cursor.fetchall()
 
         for row in rows:
-            row["title"] = self.decode_string(row["title"])
+            row["directory"] = "Film"
+            row["title"]     = self.decode_string(row["title"])
+            row["director"]  = self.decode_string(row["director"])
 
             data.append(row)
 
@@ -380,6 +383,33 @@ class Database(object):
 
         for row in rows:
             row["title"] = self.decode_string(row["title"])
+
+            data.append(row)
+
+        return data
+
+    def select_all_episodes(self):
+        data = []
+
+        self.cursor.execute("""
+                            SELECT id as media_info,
+                            title,
+                            show,
+                            year,
+                            season,
+                            episode,
+                            extension
+                            FROM television
+                            """)
+
+        rows = self.cursor.fetchall()
+
+        for row in rows:
+            row["directory"]      = "Television"
+            row["title"]          = self.decode_string(row["title"])
+            row["show"]           = self.decode_string(row["show"])
+            row["season_padded"]  = str(row["season"]).zfill(2)
+            row["episode_padded"] = str(row["episode"]).zfill(2)
 
             data.append(row)
 
@@ -546,3 +576,4 @@ class Database(object):
     def delete_music(self, data):
         # Not yet implemented.
         print data["title"]
+

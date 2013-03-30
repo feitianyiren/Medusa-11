@@ -36,7 +36,7 @@ if config.platform == "win32":
 
     vlc.str_to_bytes = _str_to_bytes
 
-# Initialize communication import.
+# Initialize communicator import.
 #------------------------------------------------------------------------------
 
 communicate = communicator.Communicate()

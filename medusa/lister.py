@@ -171,12 +171,12 @@ class Naming(object):
         for f in listing.files:
             if media_info in f:
                 # Prepend the directory to the file information.
-                if "Downloads" in f:
+                if "Completed" in f:
                     f = f.replace(downloads_mount, "")
 
                     media_file = "Downloads-" + f
 
-                elif "Temporary" in f:
+                elif "Brothel" in f:
                     f = f.replace(temporary_mount, "")
 
                     media_file = "Temporary-" + f
@@ -188,27 +188,26 @@ class Naming(object):
     def build_film_path(self, data):
         """Returns the file path to a Film."""
 
-        media_directory = "%s/%s/" % (data["directory"].title(),
-                                      data["title"])
+        media_directory = path.join(data["directory"].title(), data["title"])
 
         media_base = "%s (%s) - %s.%s" % (data["title"],
                                           data["year"],
                                           data["director"],
                                           data["extension"])
 
-        return media_directory + media_base
+        return path.join(media_directory, media_base)
 
-    def build_television_path(self, data):
+    def build_episode_path(self, data):
         """Returns the file path to a Television episode."""
 
-        media_directory = "%s/%s (%s)/S%s/" % (data["directory"].title(),
-                                               data["show"],
-                                               data["year"],
-                                               data["season_padded"])
+        show   = "%s (%s)" % (data["show"], data["year"])
+        season = "S%s" % data["season_padded"]
 
+        media_directory = path.join(data["directory"].title(), show, season)
+ 
         media_base = "%s - %s - %s.%s" % (data["show"],
                                           data["episode_padded"],
                                           data["title"],
                                           data["extension"])           
 
-        return media_directory + media_base
+        return path.join(media_directory, media_base)

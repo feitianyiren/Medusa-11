@@ -41,7 +41,7 @@ web = flask.Flask(__name__,
                   static_folder = "medusa/files/web",
                   template_folder = "medusa/files/html")
 
-# Initialize our core imports.
+# Initialize core imports.
 #------------------------------------------------------------------------------
 
 naming      = lister.Naming()
@@ -564,7 +564,7 @@ def playing_start_page(receiver, directory, media_info):
         media_file = naming.build_film_path(data)
 
     elif directory == "television":
-        media_file = naming.build_television_path(data)
+        media_file = naming.build_episode_path(data)
 
     elif directory == "disc":
 	media_file = "disc"
