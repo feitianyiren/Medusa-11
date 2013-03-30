@@ -165,12 +165,12 @@ class Database(object):
         return self.cursor.fetchall()
 
     def update_media_played(self, media_directory, media_info):
-        # Recent media is handled separately as it has no auto database entry.
-        if media_directory == "recent":
+        # New media is handled separately as it has no auto database entry.
+        if media_directory == "new":
             self.cursor.execute("""
                                 SELECT media_info
                                 FROM viewed
-                                WHERE media_directory = "recent"
+                                WHERE media_directory = "new"
                                 AND media_info = ?
                                 """, (media_info,))
 
@@ -184,7 +184,7 @@ class Database(object):
             except TypeError:
                 self.cursor.execute("""
                                     INSERT INTO viewed
-                                    VALUES ("recent",
+                                    VALUES ("new",
                                     ?,
                                     datetime('now', 'localtime'),
                                     null)
@@ -210,18 +210,18 @@ class Database(object):
                                   media_directory,
                                   media_info))
 
-    def select_recent(self, media_info):
+    def select_new(self, media_info):
         self.cursor.execute("""
                             SELECT date_played,
                             time_viewed
                             FROM viewed
-                            WHERE media_directory = "recent"
+                            WHERE media_directory = "new"
                             AND media_info = ? 
                             """, (media_info,))
 
         row = self.cursor.fetchone()
 
-        # Not all Recent media will have a database entry yet.
+        # Not all New media will have a database entry yet.
         try:
             date_played = row["date_played"]
             time_viewed = row["time_viewed"]

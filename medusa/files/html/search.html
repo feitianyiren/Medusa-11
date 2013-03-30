@@ -64,12 +64,12 @@
 
     <a class="result" href="/">No music here yet.</a>
 
-{% elif directory == "recent" %}
+{% elif directory == "new" %}
 
     {% for info in data %}
 
         <a class="result"
-           href="/info/recent/{{ info[1] }}">
+           href="/info/new/{{ info[1] }}">
             {{ info[1] }}
         </a>
 

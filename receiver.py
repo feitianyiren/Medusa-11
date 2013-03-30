@@ -374,7 +374,7 @@ class Control(object):
 
 def parse_arguments():
     help = """The Downloads and Temporary mounts are optional. They provide
-              functionality for the 'Recent' page."""
+              functionality for the 'New' page."""
 
     parser = argparse.ArgumentParser(description = help)
 

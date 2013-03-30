@@ -157,8 +157,8 @@ class Naming(object):
 
         return data
 
-    def build_recent_path(self, media_info, downloads_mount, temporary_mount):
-        """Returns the full file path to a Recent media."""
+    def build_new_path(self, media_info, downloads_mount, temporary_mount):
+        """Returns the full file path to a New media file."""
 
         media_file = ""
 

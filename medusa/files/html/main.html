@@ -46,9 +46,9 @@
                 };
             };
 
-            if (current_url[2] == "recent")
+            if (current_url[2] == "new")
             {
-                current_page = "recent";
+                current_page = "new";
             }
 
             else if (current_url[1] == "info")
@@ -105,9 +105,9 @@
             <div class="browse_text button_text">Browse</div>
         </a>
 
-        <a class="recent button" href="/recent">
-            <img src="{{ url_for('static', filename='icons/icon-recent.png') }}">
-            <div class="button_text">Recent</div>
+        <a class="new button" href="/new">
+            <img src="{{ url_for('static', filename='icons/icon-new.png') }}">
+            <div class="button_text">New</div>
         </a>
 
         <a class="playing button" href="/playing">

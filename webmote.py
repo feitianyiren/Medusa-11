@@ -236,7 +236,7 @@ def browse_page(directory = None):
     The Browse page is a shell for holding the results returned from the
     Search page, which is requested by JQuery on page load or live search.
 
-    Contains variables such as directory (Film, Recent, etc) or
+    Contains variables such as directory (Film, New, etc) or
     sub-directory (Show, Artist, etc). This is to help the page request and
     format its dynamic content.
     """
@@ -264,14 +264,14 @@ def browse_music_page(artist, album = None):
                                  artist = artist,
                                  album = album)
 
-@web.route("/recent")
-def recent_page():
-    """Return a redirect to the Browse Recent page.
+@web.route("/new")
+def new_page():
+    """Return a redirect to the Browse New page.
 
     This exists for URL naming convention consistency.
     """
 
-    return flask.redirect("/browse/recent")
+    return flask.redirect("/browse/new")
 
 @web.route("/search")
 def search_page():
@@ -283,9 +283,9 @@ def search_page():
 
     return flask.render_template("search.html")
 
-@web.route("/search/recent")
-def search_recent_page():
-    """Return the Search Recent result page.
+@web.route("/search/new")
+def search_new_page():
+    """Return the Search New result page.
 
     Contains a combined file listing of the Downloads and Temporary
     directories, assuming they have been given as command-line arguments.
@@ -322,7 +322,7 @@ def search_recent_page():
     data.sort(reverse = True)
 
     return flask.render_template("search.html",
-                                 directory = "recent",
+                                 directory = "new",
                                  data = data)
 
 @web.route("/search/film")
@@ -410,7 +410,7 @@ def info_page(directory, media_info):
     This page presents the option to begin playback on a chosen Receiver.
     It also shows when the media was last played, and if it can be resumed.
 
-    In the case of Recent media the only information gathered is the already
+    In the case of New media the only information gathered is the already
     passed title and if it has been played before.
     """
 
@@ -452,7 +452,7 @@ def playing_page(receiver = None):
     The Playing page for an active Receiver allows the user to monitor and
     control media playback.
 
-    For a Recent media file, 'media_info' is the filename. For indexed media
+    For a New media file, 'media_info' is the filename. For indexed media
     files it is the database entry ID.
     """
 
@@ -474,8 +474,8 @@ def playing_page(receiver = None):
             if not directory:
                 return flask.redirect("/browse")
 
-            # Do not query database for Recent files, they are not indexed.
-            if directory != "recent":
+            # Do not query database for New files, they are not indexed.
+            if directory != "new":
                 _query = "select_%s" % (directory)
 
                 data = getattr(database, _query)(info["media_info"])
@@ -533,7 +533,7 @@ def playing_start_page(receiver, directory, media_info):
     and set the duration elapsed for the media to 0.
 
     Build the filename of the selected media from its database entry. If it
-    is a Recent file, 'media_info' is already the filename, so only the
+    is a New file, 'media_info' is already the filename, so only the
     directory needs to be appended, so the Receiver will know where to look.
 
     Check to see if the media has been played before and has a partial
@@ -553,11 +553,11 @@ def playing_start_page(receiver, directory, media_info):
 
     data["directory"] = directory
 
-    # Recent files require a filesystem browse, rather than database select.
-    if directory == "recent":
-        media_file = naming.build_recent_path(media_info,
-                                              options.downloads_mount,
-                                              options.temporary_mount)
+    # New files require a filesystem browse, rather than database select.
+    if directory == "new":
+        media_file = naming.build_new_path(media_info,
+                                           options.downloads_mount,
+                                           options.temporary_mount)
 
     # Build the media filename based on the below naming conventions.
     elif directory == "film":
@@ -730,8 +730,8 @@ def viewed_page():
         viewed_media = database.select_viewed_media()
 
         for mda in viewed_media:
-            # Recent media uses its filename as the title.
-            if mda["media_directory"] == "recent":
+            # New media uses its filename as the title.
+            if mda["media_directory"] == "new":
                 title = mda["media_info"]
 
             # Indexed media builds a more user friendly title.
@@ -792,7 +792,7 @@ def admin_page(receiver = None):
 
 def parse_arguments():
     help = """Launches the Webmote server. Both arguments are optional but
-              provide functionality to the 'Recent' page."""
+              provide functionality to the 'New' page."""
 
     parser = argparse.ArgumentParser(description = help)
 
