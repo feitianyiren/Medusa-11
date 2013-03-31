@@ -5,20 +5,19 @@ Receivers instructions from a Webmote and actions them using the libVLC API.
 """
 
 import os
+import sys
 from time import sleep
 import argparse
 import glob
 from multiprocessing import Process
 
 import requests
+from PyQt4 import QtGui
 
 from medusa import (configger as config,
                     logger as log,
                     communicator,
                     vlc)
-
-if config.platform == "linux2":
-    from gtk import DrawingArea
 
 if config.platform == "win32":
     from win32api import keybd_event
@@ -62,7 +61,6 @@ def main():
 
         if control.state == "Ended":
             control.stop()
-
             api.action("stop")
 
         log.write("Performing action '%s'." % (control.action))
@@ -72,14 +70,12 @@ def main():
 
         try:
             action_result = getattr(control, control.action)()
-
             if action_result:
                 communicate.reply(action_result)
 
         except Exception as error:
             log.error("Failed to perform action '%s': %s." % (control.action,
                                                               error))
-
             continue
 
 # Watcher sub-process.
@@ -98,21 +94,17 @@ def media_watcher():
         with communicate:
             communicate.send("get_status")
 
+            # Calculate time to sleep based on remaining playback duration.
             state, time_elapsed, time_total = communicate.receive()
-
             time_remaining = int(time_total) - int(time_elapsed)
-
             time_sleep = time_remaining / 2
-
             if time_sleep < 3:
                 time_sleep = 0.5
 
         if state in ["Ended", "opped"]:
             with communicate:
                 communicate.send(("play", "next"))
-
             log.write("Watcher exited.")
-
             break
 
         sleep(time_sleep)
@@ -133,7 +125,6 @@ class Api(object):
         action_url = "%s/%s/%s" % (config.hostname,
                                    action,
                                    option)
-
         url = self.base_url + action_url
 
         requests.get(url)
@@ -160,12 +151,10 @@ class Media(object):
 
         if "Downloads-" in media_partial:
             media_partial = media_partial.strip("Downloads-")
-
             media_mount = options.downloads_mount
 
         if "Temporary-" in media_partial:
             media_partial = media_partial.strip("Temporary-")
-
             media_mount = options.temporary_mount
 
         if config.platform == "win32":
@@ -192,7 +181,6 @@ class Media(object):
 
         for fle in os.listdir(media_directory):
             extension = os.path.splitext(fle)[1]
-
             extension = extension.lstrip(".").lower()
 
             if extension in config.video_extensions:
@@ -207,28 +195,39 @@ class Media(object):
                                        self.media_info))
 
 
-class Control(object):
+class Control(QtGui.QMainWindow):
     """Control the media playback through the libVLC API."""
 
     def __init__(self):
+        super(Control, self).__init__()
+
         self.action = ""
         self.option = ""
         self.state  = ""
         self.queue  = []
 
-        self.instance = vlc.Instance("--no-xlib")
-
+        self.instance     = vlc.Instance("--no-xlib")
         self.media_player = self.instance.media_player_new()
 
+        self.init_ui()
+
+    def init_ui(self):
+        """Create a window and let VLC know to play using it."""
+
+        self.window = QtGui.QWidget()
+
+        # Point VLC to the window, different for each platform.
         if config.platform == "linux2":
-            window = DrawingArea()
+            self.media_player.set_xwindow(self.window.winId())
 
-            def embed(*args):
-                self.media_player.set_xwindow(window.window.xid)
+        elif config.platform == "win32":
+            self.media_player.set_hwnd(self.window.winId())
 
-                return True
+        elif config.platform == "darwin":
+            self.media_player.set_agl(self.window.winId())
 
-            window.connect("map", embed)
+        self.setCentralWidget(self.window)
+        self.show()
 
     def get_status(self):
         time_elapsed, time_total = self.get_time()
@@ -241,50 +240,36 @@ class Control(object):
         if self.option == "next":
             if self.queue:
                 media_file, directory, media_info = self.queue.pop(0)
-
                 time_viewed = 0
 
             else:
                 log.write("Cannot play next media, queue is empty.")
-
                 return
 
         else:
             media_partial, time_viewed, directory, media_info = self.option
-
             media = Media(directory, media_info)
-
             media.get_media_file(media_partial)
-
             self.queue.extend(media.parts)
-
             media_file = media.media_file
 
         media_ready = self.instance.media_new(media_file)
-
         self.media_player.set_media(media_ready)
 
         api.action("begin", (directory, media_info))
 
         if self.state not in ["Playing", "Paused"]:
             media_watch = Process(target = media_watcher)
-
             media_watch.start()
 
         self.media_player.play()
-
         if time_viewed:
             self.media_player.set_time(time_viewed * 1000)
-
         self.media_player.set_fullscreen(1)
-
-	self.mute()
-
+        self.mute()
         if self.media_player.audio_get_mute():
             self.mute()
-
         self.media_player.audio_set_volume(40)
-
         self.focus()
 
     def pause(self):
@@ -311,26 +296,18 @@ class Control(object):
 
     def volume_up(self):
         current_volume = self.media_player.audio_get_volume()
-
-        target_volume = current_volume + 15
-
+        target_volume  = current_volume + 15
         if target_volume > 200:
             target_volume = 200
-
         log.write("Setting volume to '%s'." % (target_volume))
-
         self.media_player.audio_set_volume(target_volume)
 
     def volume_down(self):
         current_volume = self.media_player.audio_get_volume()
-
-        target_volume = current_volume - 15
-
+        target_volume  = current_volume - 15
         if current_volume < 30:
             target_volume = 10
-
         log.write("Setting volume to '%s'." % (target_volume))
-
         self.media_player.audio_set_volume(target_volume)
 
     def mute(self):
@@ -341,19 +318,15 @@ class Control(object):
 
     def get_time(self):
         time_elapsed = str(int(self.media_player.get_time()) / 1000)
-
         time_total = str(int(self.media_player.get_length()) / 1000)
-
         return time_elapsed, time_total
 
     def get_subtitle_tracks(self):
         result = self.media_player.video_get_spu_description()
-
         return ["null"] + result
 
     def get_audio_tracks(self):
         result = self.media_player.audio_get_track_description()
-
         return ["null"] + result
 
     def set_subtitle_track(self):
@@ -401,20 +374,15 @@ def parse_arguments():
 
 if __name__ == "__main__":
     log.write("Receiver launched.")
-
     options = parse_arguments()
-
     api = Api()
 
     try:
         api.action("insert", options.name)
-
+        qt = QtGui.QApplication(sys.argv)
         main()
 
     finally:
         api.action("delete")
-
         communicate.close_connection()
-
         log.write("Receiver exited.")
-
