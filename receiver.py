@@ -114,7 +114,7 @@ class Receiver(QtCore.QThread):
 
             log.write("Received action '%s' and option '%s'." % (action, option))
 
-            # Send a tuple of received data to the player.
+            # Send the received action to the player.
             self.receive.emit((action, option))
 
 
@@ -144,7 +144,9 @@ class Player(QtGui.QMainWindow):
         self.gui()
 
     def gui(self):
-        """Construct the GUI and let VLC know to play inside it's window."""
+        """Construct the invisible GUI and let VLC know to play inside it's
+        window.
+        """
 
         self.setWindowTitle("Medusa")
 
@@ -157,6 +159,12 @@ class Player(QtGui.QMainWindow):
         self.move(frame.topLeft())
 
         self.window = QtGui.QWidget(self)
+
+        # Make the window background black.
+        palette = self.window.palette()
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
+        self.window.setPalette(palette)
+        self.window.setAutoFillBackground(True)
 
         # Point VLC to the window; different for each platform.
         if config.platform == "linux2":
@@ -206,8 +214,12 @@ class Player(QtGui.QMainWindow):
         return (self.state, time_elapsed, time_total)
 
     def play(self):
+        """Prepare the media, reset the media player, and begin playback."""
+
+        # Make sure any current playback has stopped.
         self.stop()
 
+        # Play the next item in the queue if one exists.
         if self.option == "next":
             if self.queue:
                 media_file, directory, media_info = self.queue.pop(0)
@@ -220,6 +232,7 @@ class Player(QtGui.QMainWindow):
                 return
 
         else:
+            # Get the full path to the media file.
             media_partial, time_viewed, directory, media_info = self.option
 
             media = Media(directory, media_info)
@@ -229,29 +242,31 @@ class Player(QtGui.QMainWindow):
 
             media_file = media.media_file
 
+        # Set the media file in the player.
         media_ready = self.instance.media_new(media_file)
         self.media_player.set_media(media_ready)
 
         api.action("begin", (directory, media_info))
 
+        # Launch a Watcher subprocess.
         if self.state not in ["Playing", "Paused"]:
             media_watch = Process(target = media_watcher)
             media_watch.start()
 
         self.media_player.play()
 
+        # If resuming playback, just to previous stopping point.
         if time_viewed:
             self.media_player.set_time(time_viewed * 1000)
 
-        self.media_player.set_fullscreen(1)
-        
+        # Reset the audio volume to default.        
         self.mute()
         if self.media_player.audio_get_mute():
             self.mute()
         self.media_player.audio_set_volume(40)
         
-        # Display the GUI.
-        self.show()
+        # Display the GUI in fullscreen.
+        self.showFullScreen()
 
         # Make sure it is foremost window.
         self.focus()
