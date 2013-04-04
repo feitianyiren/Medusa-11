@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Receiver: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
-Receivers instructions from a Webmote and actions them using the libVLC API.
+Receives instructions from a Webmote and actions them using the libVLC API.
 """
 
 import os
@@ -26,7 +26,7 @@ if config.platform == "win32":
                           VK_TAB,
                           KEYEVENTF_KEYUP)
 
-    # Fixes unicode character shell support in Windows.
+    # Fixes unicode shell support in Windows.
     def _str_to_bytes(string):
         if isinstance(string, unicode):
             return string.encode("utf-8")
@@ -41,6 +41,39 @@ if config.platform == "win32":
 
 communicate = communicator.Communicate()
 
+# Check and set a PID file.
+#------------------------------------------------------------------------------
+
+def prepare_pid(process_name):
+    """Check for an existing PID file. If not found or not running, write
+    out a new PID file for this process.
+    """
+
+    # This will only work on Linux.
+    if config.platform != "linux2":
+        return None
+
+    pid      = str(os.getpid())
+    pid_file = "/tmp/%s.pid" % process_name
+
+    if os.path.isfile(pid_file):
+        with open(pid_file, "r") as fle:
+            old_pid = fle.readline()
+
+        # Check to see if this PID is actually running and not crashed.
+        if os.path.exists("/proc/" + old_pid):
+            log.write("%s already running. Exiting." % process_name.title())
+
+            sys.exit(0)
+
+        else:
+            os.remove(pid_file)
+
+    with open(pid_file, "w") as fle:
+        fle.write(pid)
+
+    return pid_file
+
 # Watcher sub-process.
 #------------------------------------------------------------------------------
 
@@ -50,6 +83,8 @@ def media_watcher():
     """
 
     log.write("Watcher launched.")
+
+    pid_file = prepare_pid("watcher")
 
     communicate.receiver_hostname = config.hostname
 
@@ -64,12 +99,16 @@ def media_watcher():
             time_sleep     = time_remaining / 2
 
             if time_sleep < 3:
+                # Don't check more often than twice a second.
                 time_sleep = 0.5
 
         if state in ["Ended", "opped"]:
             with communicate:
                 communicate.send(("play", "next"))
             
+            if pid_file:
+                os.remove(pid_file)
+
             log.write("Watcher exited.")
             
             break
@@ -369,22 +408,19 @@ class Media(object):
         if media_partial == "disc":
             self.media_file = self.find_disc_type()
 
-            log.write(self.media_file)
-
             return
 
         media_mount = options.source_mount
 
         if "Downloads-" in media_partial:
-            media_partial = media_partial.strip("Downloads-")
+            media_partial = media_partial.strip("Downloads-/")
             media_mount   = options.downloads_mount
 
         if "Temporary-" in media_partial:
-            media_partial = media_partial.strip("Temporary-")
+            media_partial = media_partial.strip("Temporary-/")
             media_mount   = options.temporary_mount
 
         media_file = os.path.join(media_mount, media_partial)
-
         self.media_file = os.path.normpath(media_file)
 
         if not os.path.exists(self.media_file):
@@ -402,6 +438,11 @@ class Media(object):
             return "bluray:///dev/dvd"
 
     def find_media_files(self):
+        """Find files that are not named as expected. This can happen when
+        a media item is split into parts. Each part after the first will
+        be added to the queue.
+        """
+
         media_directory = os.path.dirname(self.media_file)
 
         for fle in os.listdir(media_directory):
@@ -409,7 +450,7 @@ class Media(object):
             extension = extension.lstrip(".").lower()
 
             if extension in config.video_extensions:
-                media_path = "%s/%s" % (media_directory, fle)
+                media_path = os.path.join(media_directory, fle)
 
                 if " - Part 1 - " in fle:
                     self.media_file = media_path
@@ -452,6 +493,8 @@ def parse_arguments():
 if __name__ == "__main__":
     log.write("Receiver launched.")
 
+    pid_file = prepare_pid("receiver")
+
     options = parse_arguments()
 
     api = Api()
@@ -469,6 +512,9 @@ if __name__ == "__main__":
         api.action("delete")
 
         communicate.close_connection()
+
+        if pid_file:
+            os.remove(pid_file)
 
         log.write("Receiver exited.")
 
