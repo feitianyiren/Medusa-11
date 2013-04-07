@@ -599,9 +599,9 @@ def playing_start_page(receiver, directory, media_info):
 
 @web.route("/playing/time/<receiver>")
 def playing_time_page(receiver):
-    """Return the currently elapsed time through a WebSocket.
+    """Provide a browser with the currently elapsed time through a WebSocket.
 
-    This provides live monitoring of media playback on the Playing page.
+    This allows for live monitoring of media playback on the Playing page.
     """
 
     web_socket = flask.request.environ.get("wsgi.websocket")
@@ -612,31 +612,36 @@ def playing_time_page(receiver):
     last_time_elapsed = None
 
     while True:
+        if not web_socket:
+            break
+
         with communicate:
             communicate.send("get_status")
 
             state, time_elapsed, time_total = communicate.receive()
 
-        # Break if either the WebSocket or playback are no longer active.
-        if not web_socket or state == "opped":
-            break
-
         # Convert from seconds to whole minutes.
         time_elapsed = int(round(int(time_elapsed) / 60))
         time_total   = int(round(int(time_total) / 60))
 
+        # Only send to the socket when we have something worth sending.
         if state != "Opening" and time_elapsed != last_time_elapsed:
             message = {"time_elapsed": time_elapsed,
                        "time_total": time_total}
 
+            # Send the message as JSON.
             web_socket.send(json.dumps(message))
 
             log.write("Sent elapsed time (%s minutes) to WebSocket." % time_elapsed)
 
             last_time_elapsed = time_elapsed
 
-        # If the media is still opening, try again to get the total time.
-        if state == "Opening":
+        if state == "opped":
+            # If playback has ended, abandon the socket.
+            break
+
+        elif state == "Opening":
+            # If the media is still opening, loop sooner to try again.
             gevent_sleep(0.25)
 
         else:
