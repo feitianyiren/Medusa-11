@@ -6,7 +6,7 @@
 
     <script>
 
-        // Controls the switching of option menus.
+        // Control the switching of option menus.
         function toggle_options()
         {
             var display_status = $(".main_advanced_options").css("display");
@@ -28,7 +28,7 @@
             };
         };
 
-        // Brings up and fills track (audio or subtitle) selection.
+        // Bring up and fill track (audio or subtitle) selection.
         function toggle_track_selection(track_selection)
         {
             var url = "/playing/tracks/{{ receiver }}/" + track_selection
@@ -41,55 +41,46 @@
             });
         };
 
-        // Updates the media time elapsed.
-        function update_time()
+        // Update the media time elapsed.
+        function update_time(data)
         {
-            $.get("/playing/time/{{ receiver }}", function(data)
+            var info = JSON.parse(data)
+
+            // If '-1' playback has finished, so reload the page.
+            if (info.time_elapsed == "-1")
             {
-                var info = data.split(" ")
+                window.location.reload();
+            }
 
-                var elapsed_time = info[0], total_time = info[1]
+            var time = "";
+            time += info.time_elapsed;
+            time += " minutes elapsed out of ";
+            time += info.time_total;
+            time += ".";
 
-                if (elapsed_time == "-1")
-                {
-                    window.location.reload();
-                }
-
-                else
-                {
-                    var time = "";
-
-                    time += elapsed_time;
-                    time += " minutes elapsed out of ";
-                    time += total_time;
-                    time += ".";
-
-                    $(".main_time").html(time);
-                };
-            });
+            $(".main_time").html(time);
         };
 
-        // Performs an action (control) in the background.
+        // Perform an action (control) in the background.
         function perform_action(action)
         {
             $.get("/action/{{ receiver }}/" + action);
-
-            update_time();
         };
 
+        // Open a web-socket to receive playing time updates.
         $(document).ready(function()
         {
-            // Wait .5 seconds to get first time information.
-            var initial_time = setTimeout(function()
-            {
-                update_time();
-            }, 500);
+            var url = "ws://" + window.location.host + "/playing/time/{{ receiver }}"
+            var web_socket = new WebSocket(url);
 
-            // Refresh time elapsed every 5 seconds.
-            var refresh_time = setInterval(function()
-            {
-                update_time();
-            }, 5000);
+            web_socket.onmessage = function(message) {
+                update_time(message.data);
+            };
+
+            window.onbeforeunload = function() {
+                web_socket.onclose = function () {};
+                web_socket.close()
+            };
         });
 
     </script>

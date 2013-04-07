@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """Indexer: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
 The Indexer traverses the specified directories (Film, Television, etc)

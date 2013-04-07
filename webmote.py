@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+
 """Webmote: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
 The Webmote provides a web interface which is designed for use on
 devices ranging from desktop computers to mobile phones.
 
-It uses the Werkzeug based microframework Flask to serve pages.
+It uses the Werkzeug based microframework Flask to route pages which are
+served on a Gevent WSGI server.
 
 Through this interface the user is able to browse all of their database
 indexed media in addition to a dynamically generated listing of new and
@@ -12,7 +14,8 @@ temporarily downloaded/stored media files.
 
 Media playback can be started and controlled through the web interface. The
 Webmote communicates user requests through to the appropriate Receiver using
-socket connections.
+socket connections. The playback's elapsed time is updated to the browser
+through a WebSocket.
 
 Paths to the Downloads and Temporary directories can be optionally passed
 through using '-d' and '-t' command-line arguments.
@@ -27,6 +30,10 @@ from time import (strptime,
                   strftime)
 import argparse
 
+import simplejson as json
+from gevent.pywsgi import WSGIServer
+from geventwebsocket.handler import WebSocketHandler
+from gevent import sleep as gevent_sleep
 import flask
 
 from medusa import (logger as log,
@@ -34,7 +41,7 @@ from medusa import (logger as log,
                     databaser,
                     communicator)
 
-# Get Flask ready to route our pages.
+# Get Flask ready to route pages.
 #------------------------------------------------------------------------------
 
 web = flask.Flask(__name__,
@@ -63,10 +70,11 @@ def main():
 
     log.write("Starting web server.")
 
-    # This is set up for testing, hence port 7000.
-    web.run(host = "0.0.0.0",
-            port = 7000,
-            debug = True)
+    # Run the web server using Gevent with a WebSocket handler available.
+    server = WSGIServer(("0.0.0.0", 7000),
+                        web,
+                        handler_class = WebSocketHandler)
+    server.serve_forever()
 
 # Various functions.
 #------------------------------------------------------------------------------
@@ -591,27 +599,50 @@ def playing_start_page(receiver, directory, media_info):
 
 @web.route("/playing/time/<receiver>")
 def playing_time_page(receiver):
-    """Return the Playing Time page.
+    """Return the currently elapsed time through a WebSocket.
 
-    Contains the elapsed time and total duration. It is requested by JQuery
-    and used to provide live monitoring of media on the Playing page.
+    This provides live monitoring of media playback on the Playing page.
     """
+
+    web_socket = flask.request.environ.get("wsgi.websocket")
 
     communicate.receiver_hostname = receiver
 
-    with communicate:
-        communicate.send("get_status")
+    # Keep track of the last 'elapsed time' sent, so that we don't repeat it.
+    last_time_elapsed = None
 
-        state, time_elapsed, time_total = communicate.receive()
+    while True:
+        with communicate:
+            communicate.send("get_status")
 
-    # Convert from seconds to whole minutes.
-    time_elapsed = int(round(int(time_elapsed) / 60))
+            state, time_elapsed, time_total = communicate.receive()
 
-    time_total = int(round(int(time_total) / 60))
+        # Break if either the WebSocket or playback are no longer active.
+        if not web_socket or state == "opped":
+            break
 
-    return flask.render_template("time.html",
-                                 time_elapsed = time_elapsed,
-                                 time_total = time_total)
+        # Convert from seconds to whole minutes.
+        time_elapsed = int(round(int(time_elapsed) / 60))
+        time_total   = int(round(int(time_total) / 60))
+
+        if state != "Opening" and time_elapsed != last_time_elapsed:
+            message = {"time_elapsed": time_elapsed,
+                       "time_total": time_total}
+
+            web_socket.send(json.dumps(message))
+
+            log.write("Sent elapsed time (%s minutes) to WebSocket." % time_elapsed)
+
+            last_time_elapsed = time_elapsed
+
+        # If the media is still opening, try again to get the total time.
+        if state == "Opening":
+            gevent_sleep(0.25)
+
+        else:
+            gevent_sleep(5)
+
+    return "0"
 
 @web.route("/playing/tracks/<receiver>/<track_selection>")
 def playing_tracks_page(receiver, track_selection):
