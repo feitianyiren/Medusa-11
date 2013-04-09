@@ -6,11 +6,19 @@ Provides socket based communication between the Webmote and Receivers.
 
 import socket
 
+from gevent_zeromq import zmq
 import simplejson as json
 
 import configger as config
 
+
+def get_host_ip(hostname):
+    # Cross platform, but needs testing to see if reliable.
+    return socket.gethostbyname_ex(hostname)[2][0]
+
+
 class Communicate(object):
+
     def __init__(self):
         self.receiver_hostname = None
 
@@ -19,10 +27,6 @@ class Communicate(object):
 
     def __exit__(self, type, value, traceback):
         self.close_connection()
-
-    def get_host_ip(self, hostname):
-        # Cross platform, but needs testing to see if reliable.
-        return socket.gethostbyname_ex(hostname)[2][0]
 
     def open_socket(self):
         self.socket = socket.socket(socket.AF_INET,
@@ -34,7 +38,7 @@ class Communicate(object):
                                1)
 
     def open_connection(self, receiver_hostname):
-        receiver_ip = self.get_host_ip(receiver_hostname)
+        receiver_ip = get_host_ip(receiver_hostname)
 
         self.open_socket()
 
@@ -42,15 +46,14 @@ class Communicate(object):
         self.socket.settimeout(3)
 
         self.socket.connect((receiver_ip,
-                             config.port))
+                             config.com_port))
 
     def listen(self):
-        host_ip = self.get_host_ip(config.hostname)
+        host_ip = get_host_ip(config.hostname)
 
         self.open_socket()
 
-        self.socket.bind((host_ip,
-                          config.port))
+        self.socket.bind((host_ip, config.com_port))
 
         # Keep the queue shortish to prevent spamming lag.
         self.socket.listen(3)
@@ -76,3 +79,56 @@ class Communicate(object):
             data = (data, None)
 
         self.socket.sendall(json.dumps(data))
+
+
+class Publish(object):
+
+    def __init__(self):
+        self.publish()
+
+    def open_socket(self):
+        context = zmq.Context()
+
+        self.socket = context.socket(zmq.PUB)
+
+    def close_socket(self):
+        self.socket.close()
+
+    def publish(self):
+        host_ip = get_host_ip(config.hostname)
+
+        self.open_socket()
+
+        self.socket.bind("tcp://%s:%s" % (host_ip, config.pub_port))
+
+    def send(self, data):
+        self.socket.send(json.dumps(data))
+
+
+class Subscribe(object):
+
+    def __init__(self, receiver_hostname):
+        self.receiver_hostname = receiver_hostname
+
+        self.subscribe()
+
+    def open_socket(self):
+        context = zmq.Context()
+
+        self.socket = context.socket(zmq.SUB)
+
+    def close_socket(self):
+        self.socket.close()
+
+    def subscribe(self):
+        receiver_ip = get_host_ip(self.receiver_hostname)
+
+        self.open_socket()
+
+        self.socket.connect("tcp://%s:%s" % (receiver_ip, config.pub_port))
+
+        self.socket.setsockopt(zmq.SUBSCRIBE, "")
+
+    def receive(self):
+        return json.loads(self.socket.recv())
+

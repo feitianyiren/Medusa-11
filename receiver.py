@@ -81,40 +81,68 @@ def prepare_pid(process_name):
 def media_watcher():
     """Spawn a sub-process that keeps in communication with the Receiver
     to ensure playback ends punctually and the next item in the queue begins.
+
+    Publishes media playback state for the Webmote to receive.
     """
 
     log.write("Watcher launched.")
 
     pid_file = prepare_pid("watcher")
 
+    publish = communicator.Publish()
+
     communicate.receiver_hostname = config.hostname
 
+    # Keep track of the last 'elapsed time' so that we don't re-publish it.
+    last_time_elapsed = None
+
     while True:
+        # Get the current status of media playback.
         with communicate:
             communicate.send("get_status")
 
-            # Calculate time to sleep based on remaining playback duration.
             state, time_elapsed, time_total = communicate.receive()
 
-            time_remaining = int(time_total) - int(time_elapsed)
-            time_sleep     = time_remaining / 2
+        # Convert from seconds to whole minutes.
+        time_elapsed = int(round(int(time_elapsed) / 60))
+        time_total   = int(round(int(time_total) / 60))
 
-            if time_sleep < 3:
-                # Don't check more often than twice a second.
-                time_sleep = 0.5
+        # Publish the status for the Webmote to receive, if it has changed.
+        if state != "Opening" and time_elapsed != last_time_elapsed:
+            publish.send((state, time_elapsed, time_total))
 
+            log.write("Published state '%s', time elapsed '%s', and time total '%s'." % (state,
+                                                                                         time_elapsed,
+                                                                                         time_total))
+
+            last_time_elapsed = time_elapsed
+
+        # If playback has ended, request the next queued media and then exit.
         if state in ["Ended", "opped"]:
             with communicate:
                 communicate.send(("play", "next"))
-            
+
             if pid_file:
                 os.remove(pid_file)
 
-            log.write("Watcher exited.")
-            
             break
 
+        # Determine time for the loop to sleep.
+        if state == "Opening":
+            time_sleep = 0.25
+
+        # If less than 5 seconds remain, speed up the loop.
+        elif int(time_total) - int(time_elapsed) < 5:
+            time_sleep = 0.5
+
+        else:
+            time_sleep = 10
+
         sleep(time_sleep)
+
+    publish.close_socket()
+
+    log.write("Watcher exited.")
 
 # Classes.
 #------------------------------------------------------------------------------

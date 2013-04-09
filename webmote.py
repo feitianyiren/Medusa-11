@@ -601,6 +601,8 @@ def playing_start_page(receiver, directory, media_info):
 def playing_time_page(receiver):
     """Provide a browser with the currently elapsed time through a WebSocket.
 
+    Subscribe to the Receiver's Watcher process for updates.
+
     This allows for live monitoring of media playback on the Playing page.
     """
 
@@ -608,44 +610,48 @@ def playing_time_page(receiver):
 
     communicate.receiver_hostname = receiver
 
-    # Keep track of the last 'elapsed time' sent, so that we don't repeat it.
-    last_time_elapsed = None
+    # Get the current status to display immediately.
+    with communicate:
+        communicate.send("get_status")
 
-    while True:
-        if not web_socket:
-            break
-
-        with communicate:
-            communicate.send("get_status")
-
-            state, time_elapsed, time_total = communicate.receive()
+        state, time_elapsed, time_total = communicate.receive()
 
         # Convert from seconds to whole minutes.
         time_elapsed = int(round(int(time_elapsed) / 60))
         time_total   = int(round(int(time_total) / 60))
 
-        # Only send to the socket when we have something worth sending.
-        if state != "Opening" and time_elapsed != last_time_elapsed:
-            message = {"time_elapsed": time_elapsed,
-                       "time_total": time_total}
+    # Subscribe to status updates from the Receiver.
+    subscribe = communicator.Subscribe(receiver)
 
-            # Send the message as JSON.
-            web_socket.send(json.dumps(message))
+    # Loop waiting for status updates.
+    while True:
+        if not web_socket:
+            log.error("WebSocket not found.")
 
-            log.write("Sent elapsed time (%s minutes) to WebSocket." % time_elapsed)
+            break
 
-            last_time_elapsed = time_elapsed
+        message = {"time_elapsed": time_elapsed, "time_total": time_total}
+
+        try:
+            if state != "Opening":
+                # Send the message as JSON.
+                web_socket.send(json.dumps(message))
+
+        except Exception as excp:
+            log.error("Failed to send to WebSocket: %s" % excp)
+
+            break
+
+        log.write("Sent elapsed time (%s minutes) to WebSocket." % time_elapsed)
 
         if state == "opped":
             # If playback has ended, abandon the socket.
             break
 
-        elif state == "Opening":
-            # If the media is still opening, loop sooner to try again.
-            gevent_sleep(0.25)
+        # Wait for an update.
+        state, time_elapsed, time_total = subscribe.receive()
 
-        else:
-            gevent_sleep(5)
+    subscribe.close_socket()
 
     return "0"
 

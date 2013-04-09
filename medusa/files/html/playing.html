@@ -44,13 +44,13 @@
         // Update the media time elapsed.
         function update_time(data)
         {
-            var info = JSON.parse(data)
+            var info = JSON.parse(data);
 
             // If '-1' playback has finished, so reload the page.
             if (info.time_elapsed == "-1")
             {
                 window.location.reload();
-            }
+            };
 
             var time = "";
             time += info.time_elapsed;
@@ -70,7 +70,7 @@
         // Open a web-socket to receive playing time updates.
         $(document).ready(function()
         {
-            var url = "ws://" + window.location.host + "/playing/time/{{ receiver }}"
+            var url = "ws://" + window.location.host + "/playing/time/{{ receiver }}";
             var web_socket = new WebSocket(url);
 
             web_socket.onmessage = function(message) {
@@ -79,7 +79,8 @@
 
             window.onbeforeunload = function() {
                 web_socket.onclose = function () {};
-                web_socket.close()
+                web_socket.close();
+                return null;
             };
         });
 

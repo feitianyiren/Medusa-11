@@ -17,7 +17,8 @@ audio_extensions = {"mp3", "m4a"}
 
 ignore_files = {"Thumbs.db"}
 
-port = 8822 # The port for Receivers and the Webmote to communicate on.
+com_port = 8822 # The port for Receivers and the Webmote to communicate on.
+pub_port = 8829
 
 # Internal configurations.
 
