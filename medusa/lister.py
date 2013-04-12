@@ -171,12 +171,12 @@ class Naming(object):
         for f in listing.files:
             if media_info in f:
                 # Prepend the directory to the file information.
-                if "Completed" in f:
+                if config.downloads_name in f:
                     f = f.replace(downloads_mount, "")
 
                     media_file = "Downloads-" + f
 
-                elif "Brothel" in f:
+                elif config.temporary_name in f:
                     f = f.replace(temporary_mount, "")
 
                     media_file = "Temporary-" + f

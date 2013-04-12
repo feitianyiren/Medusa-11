@@ -36,7 +36,8 @@ from geventwebsocket.handler import WebSocketHandler
 from gevent import sleep as gevent_sleep
 import flask
 
-from medusa import (logger as log,
+from medusa import (configger as config,
+                    logger as log,
                     lister,
                     databaser,
                     communicator)
@@ -45,8 +46,8 @@ from medusa import (logger as log,
 #------------------------------------------------------------------------------
 
 web = flask.Flask(__name__,
-                  static_folder = "medusa/files/web",
-                  template_folder = "medusa/files/html")
+                  static_folder = config.static_folder,
+                  template_folder = config.template_folder)
 
 # Initialize core imports.
 #------------------------------------------------------------------------------
@@ -71,9 +72,10 @@ def main():
     log.write("Starting web server.")
 
     # Run the web server using Gevent with a WebSocket handler available.
-    server = WSGIServer(("0.0.0.0", 7000),
+    server = WSGIServer((config.webmote_ip, config.webmote_port),
                         web,
-                        handler_class = WebSocketHandler)
+                        handler_class = WebSocketHandler,
+                        log = log)
     server.serve_forever()
 
 # Various functions.
@@ -105,8 +107,7 @@ def check_alive_receivers(receivers):
             alive_receivers.append(rcv)
 
         except IOError as error:
-            log.error("Clearing dead Receiver '%s': %s." % (rcv["host"],
-                                                            error))
+            log.error("Clearing dead Receiver '%s': %s." % (rcv["host"], error))
 
             # This removes the Receiver database entry entirely.
             api("delete", rcv["host"])
@@ -147,19 +148,14 @@ def begin_playing_receiver(receiver, directory, media_info):
     playing media, and update the play time history for that media.
     """
 
-    database.update_receiver_media(receiver,
-                                   directory,
-                                   media_info)
+    database.update_receiver_media(receiver, directory, media_info)
 
-    database.update_receiver_status(receiver,
-                                    "playing")
+    database.update_receiver_status(receiver, "playing")
 
     # Updates the last played time stamp for the media.
     database.update_media_played(directory, media_info)
 
-    database.update_media_elapsed(directory,
-                                  media_info,
-                                  0)
+    database.update_media_elapsed(directory, media_info, 0)
 
 def clear_receiver(receiver):
     """Clear the Receiver's active status from the Receiver database by
@@ -222,8 +218,7 @@ def index_page():
     bookmark = False
 
     if bookmark:
-        return flask.render_template("browse.html",
-                                     directory = None)
+        return flask.render_template("browse.html", directory = None)
 
     active_count, active_receiver = count_active_receivers()
 
@@ -249,8 +244,7 @@ def browse_page(directory = None):
     format its dynamic content.
     """
 
-    return flask.render_template("browse.html",
-                                 directory = directory)
+    return flask.render_template("browse.html", directory = directory)
 
 @web.route("/browse/television/<show>")
 @web.route("/browse/television/<show>/<season>")
@@ -329,9 +323,7 @@ def search_new_page():
 
     data.sort(reverse = True)
 
-    return flask.render_template("search.html",
-                                 directory = "new",
-                                 data = data)
+    return flask.render_template("search.html", directory = "new", data = data)
 
 @web.route("/search/film")
 @web.route("/search/film/<term>")
@@ -359,9 +351,7 @@ def search_film_page(term = ""):
     with database:
         data = database.select_films(term)
 
-    return flask.render_template("search.html",
-                                 directory = "film",
-                                 data = data)
+    return flask.render_template("search.html", directory = "film", data = data)
 
 @web.route("/search/television")
 @web.route("/search/television/<show>")
@@ -739,12 +729,10 @@ def playing_action_page(receiver, action, option = None):
         # When already paused: unpause. Updates database accordingly.
         elif action == "pause":
             if data["status"] == "playing":
-                database.update_receiver_status(receiver,
-                                                "paused")
+                database.update_receiver_status(receiver, "paused")
 
             else:
-                database.update_receiver_status(receiver,
-                                                "playing")
+                database.update_receiver_status(receiver, "playing")
 
     # Sends the action as a two value tuple.
     with communicate:
@@ -794,12 +782,9 @@ def viewed_page():
                                                   info["title"])
 
             # We need enough information to build a URL to the Info page.
-            data.append((mda["media_directory"],
-                         mda["media_info"],
-                         title))
+            data.append((mda["media_directory"], mda["media_info"], title))
 
-    return flask.render_template("viewed.html",
-                                 data = data)
+    return flask.render_template("viewed.html", data = data)
 
 @web.route("/admin")
 @web.route("/admin/<receiver>")

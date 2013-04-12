@@ -1,7 +1,6 @@
 """Part of Medusa (MEDia USage Assistant).
 
 Provides socket based communication between the Webmote and Receivers.
-
 """
 
 import socket

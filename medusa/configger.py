@@ -1,32 +1,30 @@
-# User configured settings for Medusa.
+"""Provide local variables of everything set in the YAML configuration file,
+as well as a few other useful bits of global information.
+"""
 
-directories = {"Film", "Television"}
+def read_config(config_file):
+    from yaml import load
 
-video_extensions = {"asf",
-                    "avi",
-                    "divx",
-                    "flv",
-                    "m4v",
-                    "mkv",
-                    "mp4",
-                    "mpg",
-                    "ogm",
-                    "m2ts"}
+    with open(config_file, "r") as fle:
+        config = load(fle)
 
-audio_extensions = {"mp3", "m4a"}
+    return config
 
-ignore_files = {"Thumbs.db"}
+# Get the base path of this Medusa installation.
+from os.path import join, abspath, dirname
+base_path = join(dirname(abspath(__file__)), "..")
 
-com_port = 8822 # The port for Receivers and the Webmote to communicate on.
-pub_port = 8829
+# Read in the configuration file.
+config_file = join(base_path, "files/medusa.cfg")
+locals().update(read_config(config_file))
 
-# Internal configurations.
+# Get the full path to the database and log files.
+database_file = join(base_path, database_file)
+log_file = join(base_path, log_file)
 
+# Get the operating system.
+from sys import platform
+
+# Get the hostname.
 from socket import gethostname
 hostname = gethostname()
-
-from os.path import dirname
-database_file = dirname(__file__) + "/files/medusa.db"
-log_file = dirname(__file__) + "/files/medusa.log"
-
-from sys import platform

@@ -128,15 +128,11 @@ def media_watcher():
             break
 
         # Determine time for the loop to sleep.
-        if state == "Opening":
+        if (state == "Opening") or (int(time_total) - int(time_elapsed) < 5):
             time_sleep = 0.25
 
-        # If less than 5 seconds remain, speed up the loop.
-        elif int(time_total) - int(time_elapsed) < 5:
-            time_sleep = 0.5
-
         else:
-            time_sleep = 10
+            time_sleep = config.watcher_sleep
 
         sleep(time_sleep)
 
@@ -151,7 +147,7 @@ class Api(object):
     """Communicate with the Webmote's web API."""
 
     def __init__(self):
-        self.base_url = "http://%s:7000/api/" % (options.webmote)
+        self.base_url = "http://%s:%s/api/" % (options.webmote, config.webmote_port)
 
     def action(self, action, option = None):
         if action == "begin":
@@ -331,8 +327,8 @@ class Player(QtGui.QMainWindow):
         self.mute()
         if self.media_player.audio_get_mute():
             self.mute()
-        self.media_player.audio_set_volume(40)
-        
+        self.media_player.audio_set_volume(config.default_volume)
+
         # Display the GUI in fullscreen.
         self.showFullScreen()
 
@@ -345,8 +341,8 @@ class Player(QtGui.QMainWindow):
     def rewind(self):
         current_time = self.media_player.get_time()
 
-        if current_time > 30000:
-            target_time = current_time - 30000
+        if current_time > config.rewind_increment:
+            target_time = current_time - config.rewind_increment
 
         else:
             target_time = 0
@@ -366,7 +362,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_up(self):
         current_volume = self.media_player.audio_get_volume()
-        target_volume  = current_volume + 15
+        target_volume  = current_volume + config.volume_increment
 
         if target_volume > 200:
             target_volume = 200
@@ -377,7 +373,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_down(self):
         current_volume = self.media_player.audio_get_volume()
-        target_volume  = current_volume - 15
+        target_volume  = current_volume - config.volume_increment
 
         if current_volume < 30:
             target_volume = 10
