@@ -604,7 +604,13 @@ def playing_time_page(receiver):
     with communicate:
         communicate.send("get_status")
 
-        state, time_elapsed, time_total = communicate.receive()
+        try:
+            state, time_elapsed, time_total = communicate.receive()
+
+        except Exception as excp:
+            state = "Unknown"
+            time_elapsed = 0
+            time_total = 0
 
         # Convert from seconds to whole minutes.
         time_elapsed = int(round(int(time_elapsed) / 60))

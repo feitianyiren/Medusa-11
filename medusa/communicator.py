@@ -47,8 +47,11 @@ class Communicate(object):
         self.socket.connect((receiver_ip,
                              config.com_port))
 
-    def listen(self):
+    def listen(self, use_host_ip = True):
         host_ip = get_host_ip(config.hostname)
+
+        if not use_host_ip:
+            host_ip = ""
 
         self.open_socket()
 

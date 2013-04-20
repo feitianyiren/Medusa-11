@@ -259,7 +259,7 @@ class Player(QtGui.QMainWindow):
 
         if self.action == "restart":
             # Not yet implemented.
-            pass
+            return
 
         try:
             # Attempt to perform the received action.
