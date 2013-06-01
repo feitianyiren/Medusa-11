@@ -1,8 +1,8 @@
-"""Part of Medusa (MEDia USage Assistant).
+"""
+Part of Medusa (MEDia USage Assistant).
 
 Provides recursive directory listings which are filtered for specific
 media extensions, as specified in the Configger.
-
 """
 
 from os import path, listdir
@@ -12,12 +12,16 @@ from itertools import ifilter
 
 import configger as config
 
+#------------------------------------------------------------------------------
+
 class Listing(object):
+
     def __init__(self):
         self.files = set()
 
     def list_directory(self, directory):
         # Ignore hidden files.
+        #
         for f in filter(lambda x: not x.startswith("."), listdir(directory)):
             # And ignore files in the ignore list.
             if f not in config.ignore_files:
@@ -36,7 +40,10 @@ class Listing(object):
             else:
                 self.files.add(p)
 
+#------------------------------------------------------------------------------
+
 class Naming(object):
+
     def __init__(self):
         pass
 
@@ -66,7 +73,8 @@ class Naming(object):
         return False
 
     def parse_film_name(self, film):
-        """Parses a Film file name to get information ready for the database.
+        """
+        Parses a Film file name to get information ready for the database.
 
         The naming convention is:
 
@@ -75,7 +83,6 @@ class Naming(object):
         or:
 
         {Title} ({Year}) - Part 1 - {Director}.{Extension}
-
         """
 
         data = dict.fromkeys(("title",
@@ -115,13 +122,13 @@ class Naming(object):
         return data
 
     def parse_television_name(self, episode):
-        """Parses a Television episode file name to get information ready
+        """
+        Parses a Television episode file name to get information ready
         for the database.
 
         The naming convention is:
 
         {Show} ({Year})/S{Season}/{Show} - {Episode} - {Title}.{Extension}
-
         """
 
         # Get us started with the keys but no values.
@@ -165,8 +172,7 @@ class Naming(object):
         listing = Listing()
 
         # If neither optional mounts are provided, this will be empty.
-        listing.list_directories_recursive([downloads_mount,
-                                            temporary_mount])
+        listing.list_directories_recursive([downloads_mount, temporary_mount])
 
         for f in listing.files:
             if media_info in f:
@@ -190,24 +196,20 @@ class Naming(object):
 
         media_directory = path.join(data["directory"].title(), data["title"])
 
-        media_base = "%s (%s) - %s.%s" % (data["title"],
-                                          data["year"],
-                                          data["director"],
-                                          data["extension"])
+        media_base = "%s (%s) - %s.%s" % (data["title"], data["year"],
+                                          data["director"], data["extension"])
 
         return path.join(media_directory, media_base)
 
     def build_episode_path(self, data):
         """Returns the file path to a Television episode."""
 
-        show   = "%s (%s)" % (data["show"], data["year"])
+        show = "%s (%s)" % (data["show"], data["year"])
         season = "S%s" % data["season_padded"]
 
         media_directory = path.join(data["directory"].title(), show, season)
  
-        media_base = "%s - %s - %s.%s" % (data["show"],
-                                          data["episode_padded"],
-                                          data["title"],
-                                          data["extension"])           
+        media_base = "%s - %s - %s.%s" % (data["show"], data["episode_padded"],
+                                          data["title"], data["extension"])           
 
         return path.join(media_directory, media_base)

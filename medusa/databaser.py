@@ -1,4 +1,5 @@
-"""Part of Medusa (MEDia USage Assistant).
+"""
+Part of Medusa (MEDia USage Assistant).
 
 Provides a protocol for using the SQLite3 database.
 
@@ -17,10 +18,10 @@ import sqlite3
 
 import configger as config
 
-# The SQLite database.
 #------------------------------------------------------------------------------
 
 class Database(object):
+
     def __init__(self):
         self.database_file = config.database_file
 
@@ -67,7 +68,8 @@ class Database(object):
         return string.decode("utf-8")
 
     def check_receiver(self, host):
-        """Checks to see if a Receiver has already been entered into the
+        """
+        Checks to see if a Receiver has already been entered into the
         database.
 
         Returns either True or False.
@@ -166,6 +168,7 @@ class Database(object):
 
     def update_media_played(self, media_directory, media_info):
         # New media is handled separately as it has no auto database entry.
+        #
         if media_directory == "new":
             self.cursor.execute("""
                                 SELECT media_info
@@ -181,6 +184,7 @@ class Database(object):
                 row["media_info"]
 
             # If not, give it one.
+            #
             except TypeError:
                 self.cursor.execute("""
                                     INSERT INTO viewed
@@ -222,6 +226,7 @@ class Database(object):
         row = self.cursor.fetchone()
 
         # Not all New media will have a database entry yet.
+        #
         try:
             date_played = row["date_played"]
             time_viewed = row["time_viewed"]
@@ -405,10 +410,10 @@ class Database(object):
         rows = self.cursor.fetchall()
 
         for row in rows:
-            row["directory"]      = "Television"
-            row["title"]          = self.decode_string(row["title"])
-            row["show"]           = self.decode_string(row["show"])
-            row["season_padded"]  = str(row["season"]).zfill(2)
+            row["directory"] = "Television"
+            row["title"] = self.decode_string(row["title"])
+            row["show"] = self.decode_string(row["show"])
+            row["season_padded"] = str(row["season"]).zfill(2)
             row["episode_padded"] = str(row["episode"]).zfill(2)
 
             data.append(row)
@@ -416,9 +421,9 @@ class Database(object):
         return data
 
     def check_film(self, data):
-        """Checks to see if a Film is already in the database. If it is, no
+        """
+        Checks to see if a Film is already in the database. If it is, no
         sense in adding it again.
-
         """
 
         found = True
@@ -481,10 +486,10 @@ class Database(object):
         return found
 
     def insert_viewed(self, media_directory):
-        """When media is inserted into its directory table (Film, etc), it
+        """
+        When media is inserted into its directory table (Film, etc), it
         is also entered into the Viewed table with a matching ID, to allow
         for later joining.
-
         """
 
         self.cursor.execute("""
@@ -576,4 +581,3 @@ class Database(object):
     def delete_music(self, data):
         # Not yet implemented.
         print data["title"]
-

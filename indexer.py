@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""Indexer: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
+"""
+Indexer: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
 The Indexer traverses the specified directories (Film, Television, etc)
 inside the Source mount in search of media files that match the file
@@ -18,31 +19,28 @@ from medusa import (logger as log,
                     lister,
                     databaser)
 
-# Initialize naming import.
 #------------------------------------------------------------------------------
 
 naming = lister.Naming()
 
-# Parse command-line arguments.
 #------------------------------------------------------------------------------
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-d", "--directories",
-                        action = "append", required = True,
-                        help = "Film, Television, Music, etc.")
-    # This path is taken as Unicode to support foreign characters.
+                        action="append", required=True,
+                        help="Film, Television, Music, etc.")
     parser.add_argument("-s", "--source_mount",
-                        action = "store", type = unicode, required = True)
+                        action="store", type=unicode, required=True)
 
     return parser.parse_args()
 
-# Main.
 #------------------------------------------------------------------------------
 
 def main():
-    """List directories and add new files to the database.
+    """
+    List directories and add new files to the database.
 
     Then check for database entries that no longer exist on the harddrive and
     delete them.
@@ -72,11 +70,12 @@ def main():
         index.delete_all(delete_list)
 
 def get_deleted_media(database, directory, files):
-    delete_list   = []
+    delete_list = []
     indexed_media = []
 
     with database:
         # Get a list of all media for the directory.
+        #
         if "Film" in directory:
             data = database.select_films("%%")
 
@@ -106,11 +105,10 @@ def get_deleted_media(database, directory, files):
 
     return delete_list
 
-# The Indexer.
 #------------------------------------------------------------------------------
 
 class Index(object):
-    """Insert and Delete media into/from the database."""
+    """Insert and delete media into/from the database."""
 
     def __init__(self, options, database):
         """Receive the command-line options and database connection."""
@@ -123,8 +121,9 @@ class Index(object):
         self.naming = lister.Naming()
 
     def index_all(self, index_list):
-        """Insert all media in the index list into the database, unless
-        it already exists in the database.
+        """
+        Insert all media in the index list into the database, unless it
+        already exists in the database.
         """
 
         with self.database:
@@ -144,12 +143,11 @@ class Index(object):
                         data = getattr(self.naming, _query)(fle)
 
                         # Check if it is there already, and if not, insert it!
-                        if not getattr(self.database,
-                                       "check_" + directory)(data):
+                        #
+                        if not getattr(self.database, "check_" + directory)(data):
                             getattr(self.database, "insert_" + directory)(data)
 
-                            log.write("Indexer inserted '%s' into '%s' database." \
-                                      % (data["title"], directory))
+                            log.write("Indexer inserted '%s' into '%s' database." % (data["title"], directory))
 
     def delete_all(self, delete_list):
         """Delete all media in the delete list from the database."""
@@ -165,12 +163,11 @@ class Index(object):
                         data = getattr(self.naming, "parse_" + directory + "_name")(fle)
 
                         # Check it is there first, and if it is... delete.
-                        if getattr(self.database,
-                                   "check_" + directory)(data):
+                        #
+                        if getattr(self.database, "check_" + directory)(data):
                             getattr(self.database, "delete_" + directory)(data)
 
-                            log.write("Indexer deleted '%s' from '%s' database." \
-                                      % (data["title"], directory))
+                            log.write("Indexer deleted '%s' from '%s' database." % (data["title"], directory))
 
     def check_directory(self, directory):
         """Check that the directory is one that was passed by the user."""
@@ -179,7 +176,6 @@ class Index(object):
             if path.join(self.options.source_mount, drc) in directory:
                 return drc
 
-# Run.
 #------------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -188,4 +184,3 @@ if __name__ == "__main__":
     main()
 
     log.write("Indexer exited.")
-

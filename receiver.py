@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""Receiver: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
+"""
+Receiver: Part of Medusa (MEDia USage Assistant), by Stephen Smart.
 
 Receives instructions from a Webmote and actions them using the libVLC API.
 """
@@ -27,7 +28,8 @@ if config.platform == "win32":
                           VK_TAB,
                           KEYEVENTF_KEYUP)
 
-    # Fixes unicode shell support in Windows.
+    # Fix unicode shell support in Windows.
+    #
     def _str_to_bytes(string):
         if isinstance(string, unicode):
             return string.encode("utf-8")
@@ -37,16 +39,15 @@ if config.platform == "win32":
 
     vlc.str_to_bytes = _str_to_bytes
 
-# Initialize communicator import.
 #------------------------------------------------------------------------------
 
 communicate = communicator.Communicate()
 
-# Check and set a PID file.
 #------------------------------------------------------------------------------
 
 def prepare_pid(process_name):
-    """Check for an existing PID file. If not found or not running, write
+    """
+    Check for an existing PID file. If not found or not running, write
     out a new PID file for this process.
     """
 
@@ -54,7 +55,7 @@ def prepare_pid(process_name):
     if config.platform != "linux2":
         return None
 
-    pid      = str(os.getpid())
+    pid = str(os.getpid())
     pid_file = "/tmp/%s.pid" % process_name
 
     if os.path.isfile(pid_file):
@@ -62,6 +63,7 @@ def prepare_pid(process_name):
             old_pid = fle.readline()
 
         # Check to see if this PID is actually running and not crashed.
+        #
         if os.path.exists("/proc/" + old_pid):
             log.write("%s already running. Exiting." % process_name.title())
 
@@ -75,11 +77,11 @@ def prepare_pid(process_name):
 
     return pid_file
 
-# Watcher sub-process.
 #------------------------------------------------------------------------------
 
 def media_watcher():
-    """Spawn a sub-process that keeps in communication with the Receiver
+    """
+    Spawn a sub-process that keeps in communication with the Receiver
     to ensure playback ends punctually and the next item in the queue begins.
 
     Publishes media playback state for the Webmote to receive.
@@ -98,6 +100,7 @@ def media_watcher():
 
     while True:
         # Get the current status of media playback.
+        #
         with communicate:
             communicate.send("get_status")
 
@@ -105,19 +108,19 @@ def media_watcher():
 
         # Convert from seconds to whole minutes.
         time_elapsed = int(round(int(time_elapsed) / 60))
-        time_total   = int(round(int(time_total) / 60))
+        time_total = int(round(int(time_total) / 60))
 
         # Publish the status for the Webmote to receive, if it has changed.
+        #
         if state != "Opening" and time_elapsed != last_time_elapsed:
             publish.send((state, time_elapsed, time_total))
 
-            log.write("Published state '%s', time elapsed '%s', and time total '%s'." % (state,
-                                                                                         time_elapsed,
-                                                                                         time_total))
+            log.write("Published state '%s', time elapsed '%s', and time total '%s'." % (state, time_elapsed, time_total))
 
             last_time_elapsed = time_elapsed
 
         # If playback has ended, request the next queued media and then exit.
+        #
         if state in ["Ended", "opped"]:
             with communicate:
                 communicate.send(("play", "next"))
@@ -128,6 +131,7 @@ def media_watcher():
             break
 
         # Determine time for the loop to sleep.
+        #
         if (state == "Opening") or (int(time_total) - int(time_elapsed) < 5):
             time_sleep = 0.25
 
@@ -140,7 +144,6 @@ def media_watcher():
 
     log.write("Watcher exited.")
 
-# Classes.
 #------------------------------------------------------------------------------
 
 class Api(object):
@@ -153,14 +156,13 @@ class Api(object):
         if action == "begin":
             option = "%s-%s" % (option[0], option[1])
 
-        action_url = "%s/%s/%s" % (config.hostname,
-                                   action,
-                                   option)
+        action_url = "%s/%s/%s" % (config.hostname, action, option)
 
         url = self.base_url + action_url
 
         requests.get(url)
 
+#------------------------------------------------------------------------------
 
 class Receiver(QtCore.QThread):
     """Listen for actions from the Webmote and pass them onto the Player."""
@@ -181,9 +183,11 @@ class Receiver(QtCore.QThread):
             # Send the received action to the player.
             self.receive.emit((action, option))
 
+#------------------------------------------------------------------------------
 
 class Player(QtGui.QMainWindow):
-    """Control media playback using the VLC API, internally performing actions
+    """
+    Control media playback using the VLC API, internally performing actions
     received from the Webmote.
     """
 
@@ -192,23 +196,26 @@ class Player(QtGui.QMainWindow):
 
         self.action = ""
         self.option = ""
-        self.state  = ""
-        self.queue  = []
+        self.state = ""
+        self.queue = []
 
         # Start listening for actions from the Webmote.
+        #
         receiver = Receiver()
         receiver.receive.connect(self.process)
         receiver.start()
 
         # Create a VLC media player.
-        self.instance     = vlc.Instance("--no-xlib")
+        #
+        self.instance = vlc.Instance("--no-xlib")
         self.media_player = self.instance.media_player_new()
 
         # Initialize the GUI.
         self.gui()
 
     def gui(self):
-        """Construct the invisible GUI and let VLC know to play inside it's
+        """
+        Construct the invisible GUI and let VLC know to play inside it's
         window.
         """
 
@@ -217,7 +224,8 @@ class Player(QtGui.QMainWindow):
         self.resize(1280, 720)
 
         # Center the window on the screen.
-        frame  = self.frameGeometry()
+        #
+        frame = self.frameGeometry()
         center = QtGui.QDesktopWidget().availableGeometry().center()
         frame.moveCenter(center)
         self.move(frame.topLeft())
@@ -225,12 +233,14 @@ class Player(QtGui.QMainWindow):
         self.window = QtGui.QWidget(self)
 
         # Make the window background black.
+        #
         palette = self.window.palette()
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
         self.window.setPalette(palette)
         self.window.setAutoFillBackground(True)
 
         # Point VLC to the window; different for each platform.
+        #
         if config.platform == "linux2":
             self.media_player.set_xwindow(self.window.winId())
 
@@ -249,6 +259,7 @@ class Player(QtGui.QMainWindow):
         self.action, self.option = received
 
         # Always start with a state check.
+        #
         self.get_state()
 
         if self.state == "Ended":
@@ -263,6 +274,7 @@ class Player(QtGui.QMainWindow):
 
         try:
             # Attempt to perform the received action.
+            #
             action_result = getattr(self, self.action)()
 
             if action_result:
@@ -270,7 +282,6 @@ class Player(QtGui.QMainWindow):
 
         except Exception as error:
             log.error("Failed to perform action '%s': %s." % (self.action, error))
-
 
     def get_status(self):
         time_elapsed, time_total = self.get_time()
@@ -284,6 +295,7 @@ class Player(QtGui.QMainWindow):
         self.stop()
 
         # Play the next item in the queue if one exists.
+        #
         if self.option == "next":
             if self.queue:
                 media_file, directory, media_info = self.queue.pop(0)
@@ -297,6 +309,7 @@ class Player(QtGui.QMainWindow):
 
         else:
             # Get the full path to the media file.
+            #
             media_partial, time_viewed, directory, media_info = self.option
 
             media = Media(directory, media_info)
@@ -307,23 +320,27 @@ class Player(QtGui.QMainWindow):
             media_file = media.media_file
 
         # Set the media file in the player.
+        #
         media_ready = self.instance.media_new(media_file)
         self.media_player.set_media(media_ready)
 
         api.action("begin", (directory, media_info))
 
         # Launch a Watcher subprocess.
+        #
         if self.state not in ["Playing", "Paused"]:
-            media_watch = Process(target = media_watcher)
+            media_watch = Process(target=media_watcher)
             media_watch.start()
 
         self.media_player.play()
 
         # If resuming playback, just to previous stopping point.
+        #
         if time_viewed:
             self.media_player.set_time(time_viewed * 1000)
 
-        # Reset the audio volume to default.        
+        # Reset the audio volume to default.
+        #
         self.mute()
         if self.media_player.audio_get_mute():
             self.mute()
@@ -362,7 +379,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_up(self):
         current_volume = self.media_player.audio_get_volume()
-        target_volume  = current_volume + config.volume_increment
+        target_volume = current_volume + config.volume_increment
 
         if target_volume > 200:
             target_volume = 200
@@ -373,7 +390,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_down(self):
         current_volume = self.media_player.audio_get_volume()
-        target_volume  = current_volume - config.volume_increment
+        target_volume = current_volume - config.volume_increment
 
         if current_volume < 30:
             target_volume = 10
@@ -419,15 +436,16 @@ class Player(QtGui.QMainWindow):
             keybd_event(VK_TAB, 0x8f, KEYEVENTF_KEYUP, 0)
             keybd_event(VK_MENU, 0xb8, KEYEVENTF_KEYUP, 0)
 
+#------------------------------------------------------------------------------
 
 class Media(object):
     """Find and format a path to the media file."""
 
     def __init__(self, directory, media_info):
-        self.directory  = directory
+        self.directory = directory
         self.media_info = media_info
         self.media_file = ""
-        self.parts      = []
+        self.parts = []
 
     def get_media_file(self, media_partial):
         if media_partial == "disc":
@@ -439,11 +457,11 @@ class Media(object):
 
         if "Downloads-" in media_partial:
             media_partial = media_partial.strip("Downloads-/")
-            media_mount   = options.downloads_mount
+            media_mount = options.downloads_mount
 
         if "Temporary-" in media_partial:
             media_partial = media_partial.strip("Temporary-/")
-            media_mount   = options.temporary_mount
+            media_mount = options.temporary_mount
 
         media_file = os.path.join(media_mount, media_partial)
         self.media_file = os.path.normpath(media_file)
@@ -463,7 +481,8 @@ class Media(object):
             return "bluray:///dev/dvd"
 
     def find_media_files(self):
-        """Find files that are not named as expected. This can happen when
+        """
+        Find files that are not named as expected. This can happen when
         a media item is split into parts. Each part after the first will
         be added to the queue.
         """
@@ -481,38 +500,32 @@ class Media(object):
                     self.media_file = media_path
 
                 elif " - Part " in fle:
-                    self.parts.append((media_path,
-                                       self.directory,
-                                       self.media_info))
+                    self.parts.append((media_path, self.directory, self.media_info))
 
-# Parse command-line arguments.
 #------------------------------------------------------------------------------
 
 def parse_arguments():
     help = """The Downloads and Temporary mounts are optional. They provide
               functionality for the 'New' page."""
 
-    parser = argparse.ArgumentParser(description = help)
+    parser = argparse.ArgumentParser(description=help)
 
     parser.add_argument("-w", "--webmote",
-                        action = "store", required = True,
-                        help = "The hostname of the Webmote server.")
+                        action="store", required=True,
+                        help="The hostname of the Webmote server.")
     parser.add_argument("-n", "--name",
-                        action = "store", required = True,
-                        help = "A descriptive name for this Receiver.")
+                        action="store", required=True,
+                        help="A descriptive name for this Receiver.")
     parser.add_argument("-s", "--source_mount",
-                        action = "store", type = unicode, required = True,
-                        help = "The location of all indexed media.")
+                        action="store", type=unicode, required=True,
+                        help="The location of all indexed media.")
     parser.add_argument("-d", "--downloads_mount",
-                        action = "store", type = unicode,
-                        default = None)
+                        action="store", type=unicode, default=None)
     parser.add_argument("-t", "--temporary_mount",
-                        action = "store", type = unicode,
-                        default = None)
+                        action="store", type=unicode, default=None)
 
     return parser.parse_args()
 
-# Run.
 #------------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -542,4 +555,3 @@ if __name__ == "__main__":
             os.remove(pid_file)
 
         log.write("Receiver exited.")
-
