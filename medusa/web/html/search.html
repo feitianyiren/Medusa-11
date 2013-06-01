@@ -3,7 +3,7 @@
     {% for info in data %}
 
         <a class="result"
-		   href='/info/{{ directory }}/{{ info["media_info"] }}'>
+		   href='/medusa/info/{{ directory }}/{{ info["media_info"] }}'>
             {{ info["title"] }}
         </a>
 
@@ -16,7 +16,7 @@
         {% if season %}
 		
             <a class="result result_title"
-               href="/browse/television/{{ show }}">
+               href="/medusa/browse/television/{{ show }}">
                 {{ show }}
                 <div class="right">
                     Season {{ season }}
@@ -26,7 +26,7 @@
             {% for info in data %}
 
                 <a class="result"
-                   href='/info/{{ directory }}/{{ info["media_info"] }}'>
+                   href='/medusa/info/{{ directory }}/{{ info["media_info"] }}'>
                     {{ info["episode"] }}. {{ info["title"] }}
                 </a>
 
@@ -39,7 +39,7 @@
             {% for info in data %}
 
                 <a class="result"
-                   href='/browse/{{ directory }}/{{ show }}/{{ info["season"] }}'>
+                   href='/medusa/browse/{{ directory }}/{{ show }}/{{ info["season"] }}'>
                     Season {{ info["season"] }}
                 </a>
 
@@ -52,7 +52,7 @@
         {% for info in data %}
 
             <a class="result"
-               href='/browse/{{ directory }}/{{ info["show"] }}'>
+               href='/medusa/browse/{{ directory }}/{{ info["show"] }}'>
                 {{ info["show"] }}
             </a>
 
@@ -69,7 +69,7 @@
     {% for info in data %}
 
         <a class="result"
-           href="/info/new/{{ info[1] }}">
+           href="/medusa/info/new/{{ info[1] }}">
             {{ info[1] }}
         </a>
 
@@ -80,7 +80,7 @@
     <div class="main_content">
 
         <a class="main_button main_button_wide"
-           href="/browse/film">
+           href="/medusa/browse/film">
             Film
         </a>
 
@@ -89,7 +89,7 @@
     <div class="main_content">
 
         <a class="main_button main_button_wide"
-           href="/browse/television">
+           href="/medusa/browse/television">
             Television
         </a>
 
@@ -98,7 +98,7 @@
     <div class="main_content">
 
         <a class="main_button main_button_wide"
-           href="/browse/music">
+           href="/medusa/browse/music">
             Music
         </a>
 
@@ -107,7 +107,7 @@
     <div class="main_content">
 
         <a class="main_button main_button_wide"
-           href="/info/disc/disc">
+           href="/medusa/info/disc/disc">
             Disc
         </a>
 

@@ -31,7 +31,7 @@
         // Bring up and fill track (audio or subtitle) selection.
         function toggle_track_selection(track_selection)
         {
-            var url = "/playing/tracks/{{ receiver }}/" + track_selection
+            var url = "/medusa/playing/tracks/{{ receiver }}/" + track_selection
 
             $.get(url, function(data)
             {
@@ -64,13 +64,13 @@
         // Perform an action (control) in the background.
         function perform_action(action)
         {
-            $.get("/action/{{ receiver }}/" + action);
+            $.get("/medusa/action/{{ receiver }}/" + action);
         };
 
         // Open a web-socket to receive playing time updates.
         $(document).ready(function()
         {
-            var url = "ws://" + window.location.host + "/playing/time/{{ receiver }}";
+            var url = "ws://{{ websocket }}/medusa/playing/time/{{ receiver }}";
             var web_socket = new WebSocket(url);
 
             web_socket.onmessage = function(message) {
@@ -99,7 +99,7 @@
         <div class="main_content">
 
             <a class="main_button main_button_wide"
-               href="/action/{{ receiver }}/pause">
+               href="/medusa/action/{{ receiver }}/pause">
 
             {% if data["status"] == "paused" %}
                 Resume
@@ -133,7 +133,7 @@
             </a>
 
             <a class="main_button main_button_bottom right"
-               href="/action/{{ receiver }}/stop">
+               href="/medusa/action/{{ receiver }}/stop">
                 Stop
             </a>
 
@@ -160,12 +160,12 @@
         <div class="main_content">
 
             <a class="main_button main_settings"
-               href="/action/{{ receiver }}/reset">
+               href="/medusa/action/{{ receiver }}/reset">
                 Restart
             </a>
 
             <a class="main_button main_settings right"
-               href="/action/{{ receiver }}/mute">
+               href="/medusa/action/{{ receiver }}/mute">
                 Mute
             </a>
 
@@ -195,7 +195,7 @@
                 <div class="main_content">
 
                     <a class="main_button main_button_wide"
-                       href="/playing/{{ receiver["host"] }}">
+                       href="/medusa/playing/{{ receiver["host"] }}">
                         {{ receiver["name"] }}
                     </a>
 

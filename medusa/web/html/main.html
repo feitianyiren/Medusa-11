@@ -25,40 +25,40 @@
         {
             var current_url = window.location.pathname.split("/");
 
-            if (current_url[1] == "info")
+            if (current_url[2] == "info")
             {
-                if (current_url[2] == "film")
+                if (current_url[3] == "film")
                 {
                     $(".browse_text").html("Film");
-                    $(".browse").attr("href", "/browse/film");
+                    $(".browse").attr("href", "/medusa/browse/film");
                 };
             };
 
-            if (current_url[1] == "browse")
+            if (current_url[2] == "browse")
             {
-                if (current_url[2] == "television")
+                if (current_url[3] == "television")
                 {
-                    if (current_url.length == 4)
+                    if (current_url.length == 5)
                     {   
                         $(".browse_text").html("Television");
-                        $(".browse").attr("href", "/browse/television");
+                        $(".browse").attr("href", "/medusa/browse/television");
                     };
                 };
             };
 
-            if (current_url[2] == "new")
+            if (current_url[3] == "new")
             {
                 current_page = "new";
             }
 
-            else if (current_url[1] == "info")
+            else if (current_url[2] == "info")
             {
                 current_page = "browse";
             }
 
             else
             {
-                current_page = current_url[1];
+                current_page = current_url[2];
             };
 
             $("." + current_page).addClass("button_selected");
@@ -100,27 +100,27 @@
 
     <div id="buttons">
 
-        <a class="browse button button_left" href="/browse">
+        <a class="browse button button_left" href="/medusa/browse">
             <img src="{{ url_for('static', filename='icons/icon-browse.png') }}">
             <div class="browse_text button_text">Browse</div>
         </a>
 
-        <a class="new button" href="/new">
+        <a class="new button" href="/medusa/new">
             <img src="{{ url_for('static', filename='icons/icon-new.png') }}">
             <div class="button_text">New</div>
         </a>
 
-        <a class="playing button" href="/playing">
+        <a class="playing button" href="/medusa/playing">
             <img src="{{ url_for('static', filename='icons/icon-playing.png') }}">
             <div class="button_text">Playing</div>
         </a>
 
-        <a class="viewed button" href="/viewed">
+        <a class="viewed button" href="/medusa/viewed">
             <img src="{{ url_for('static', filename='icons/icon-viewed.png') }}">
             <div class="button_text">Viewed</div>
         </a>
 
-        <a class="admin button button_right" href="/admin">
+        <a class="admin button button_right" href="/medusa/admin">
             <img src="{{ url_for('static', filename='icons/icon-admin.png') }}">
             <div class="button_text">Admin</div>
         </a>

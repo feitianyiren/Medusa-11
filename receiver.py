@@ -150,7 +150,7 @@ class Api(object):
     """Communicate with the Webmote's web API."""
 
     def __init__(self):
-        self.base_url = "http://%s:%s/api/" % (options.webmote, config.webmote_port)
+        self.base_url = "http://%s:%s/medusa/api/" % (options.webmote, config.webmote_port)
 
     def action(self, action, option = None):
         if action == "begin":

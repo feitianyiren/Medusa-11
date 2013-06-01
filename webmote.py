@@ -47,6 +47,7 @@ from medusa import (configger as config,
 
 web = flask.Flask(__name__,
                   static_folder=config.static_folder,
+                  static_url_path="/medusa/static",
                   template_folder=config.template_folder)
 
 #------------------------------------------------------------------------------
@@ -176,8 +177,8 @@ def format_time(time):
 
 #------------------------------------------------------------------------------
 
-@web.route("/api/<receiver>/<action>")
-@web.route("/api/<receiver>/<action>/<option>")
+@web.route("/medusa/api/<receiver>/<action>")
+@web.route("/medusa/api/<receiver>/<action>/<option>")
 def api(action, receiver, option=None):
     """
     An HTTP API which is used (mainly) by Receivers to update the database
@@ -210,6 +211,12 @@ def api(action, receiver, option=None):
     return "0"
 
 @web.route("/")
+def base_page():
+    """Redirect to the /medusa index page."""
+
+    return flask.redirect("/medusa")
+
+@web.route("/medusa/")
 def index_page():
     """
     Return a redirect from the Index page.
@@ -227,16 +234,16 @@ def index_page():
     active_count, active_receiver = count_active_receivers()
 
     if active_count == 1:
-        return flask.redirect("/playing/" + active_receiver)
+        return flask.redirect("/medusa/playing/" + active_receiver)
 
     elif active_count > 1:
-        return flask.redirect("/playing")
+        return flask.redirect("/medusa/playing")
 
     else:
-        return flask.redirect("/browse")
+        return flask.redirect("/medusa/browse")
 
-@web.route("/browse")
-@web.route("/browse/<directory>")
+@web.route("/medusa/browse")
+@web.route("/medusa/browse/<directory>")
 def browse_page(directory=None):
     """
     Return the Browse page.
@@ -251,23 +258,23 @@ def browse_page(directory=None):
 
     return flask.render_template("browse.html", directory=directory)
 
-@web.route("/browse/television/<show>")
-@web.route("/browse/television/<show>/<season>")
+@web.route("/medusa/browse/television/<show>")
+@web.route("/medusa/browse/television/<show>/<season>")
 def browse_television_page(show, season=None):
     """Return the Browse page for a Television sub-directory."""
 
     return flask.render_template("browse.html", directory="television",
                                  show=show, season=season)
 
-@web.route("/browse/music/<artist>")
-@web.route("/browse/music/<artist>/<album>")
+@web.route("/medusa/browse/music/<artist>")
+@web.route("/medusa/browse/music/<artist>/<album>")
 def browse_music_page(artist, album=None):
     """Return the Browse page for a Music sub-directory."""
 
     return flask.render_template("browse.html", directory="music",
                                  artist=artist, album = album)
 
-@web.route("/new")
+@web.route("/medusa/new")
 def new_page():
     """
     Return a redirect to the Browse New page.
@@ -275,9 +282,9 @@ def new_page():
     This exists for URL naming convention consistency.
     """
 
-    return flask.redirect("/browse/new")
+    return flask.redirect("/medusa/browse/new")
 
-@web.route("/search")
+@web.route("/medusa/search")
 def search_page():
     """
     Return the default Search page.
@@ -288,7 +295,7 @@ def search_page():
 
     return flask.render_template("search.html")
 
-@web.route("/search/new")
+@web.route("/medusa/search/new")
 def search_new_page():
     """
     Return the Search New result page.
@@ -330,8 +337,8 @@ def search_new_page():
 
     return flask.render_template("search.html", directory="new", data=data)
 
-@web.route("/search/film")
-@web.route("/search/film/<term>")
+@web.route("/medusa/search/film")
+@web.route("/medusa/search/film/<term>")
 def search_film_page(term=""):
     """
     Return the Search Film result page.
@@ -359,9 +366,9 @@ def search_film_page(term=""):
 
     return flask.render_template("search.html", directory="film", data=data)
 
-@web.route("/search/television")
-@web.route("/search/television/<show>")
-@web.route("/search/television/<show>/<season>")
+@web.route("/medusa/search/television")
+@web.route("/medusa/search/television/<show>")
+@web.route("/medusa/search/television/<show>/<season>")
 def search_television_page(show=None, season=None):
     """
     Return the Search Television result page.
@@ -385,9 +392,9 @@ def search_television_page(show=None, season=None):
     return flask.render_template("search.html", directory="television",
                                  show=show, season=season, data=data)
 
-@web.route("/search/music")
-@web.route("/search/music/<artist>")
-@web.route("/search/music/<artist>/<album>")
+@web.route("/medusa/search/music")
+@web.route("/medusa/search/music/<artist>")
+@web.route("/medusa/search/music/<artist>/<album>")
 def search_music_page(artist=None, album=None):
     """
     Return the Search Music result page.
@@ -400,7 +407,7 @@ def search_music_page(artist=None, album=None):
     return flask.render_template("search.html", directory="music",
                                  artist=artist, album=album, data=data)
 
-@web.route("/info/<directory>/<media_info>")
+@web.route("/medusa/info/<directory>/<media_info>")
 def info_page(directory, media_info):
     """
     Return the Media Info page.
@@ -437,8 +444,8 @@ def info_page(directory, media_info):
     return flask.render_template("info.html", directory=directory, data=data,
                                  receivers=receivers)
 
-@web.route("/playing")
-@web.route("/playing/<receiver>")
+@web.route("/medusa/playing")
+@web.route("/medusa/playing/<receiver>")
 def playing_page(receiver=None):
     """
     Return the Playing page.
@@ -469,7 +476,7 @@ def playing_page(receiver=None):
 
             # If 'directory' is null, playback must have ended.
             if not directory:
-                return flask.redirect("/browse")
+                return flask.redirect("/medusa/browse")
 
             # Do not query database for New files, they are not indexed.
             #
@@ -492,7 +499,7 @@ def playing_page(receiver=None):
         active_count, active_receiver = count_active_receivers()
 
         if active_count == 1:
-            return flask.redirect("/playing/" + active_receiver)
+            return flask.redirect("/medusa/playing/" + active_receiver)
 
         # The HTML page knows what to do if 'active' is false.
         elif active_count > 1:
@@ -516,11 +523,14 @@ def playing_page(receiver=None):
             # Now we have a list of active Receivers only.
             receivers = receivers_active
 
+    websocket = "%s:%s" % (config.hostname, config.webmote_port)
+
     return flask.render_template("playing.html", receiver=receiver,
                                  directory=directory, data=data,
-                                 receivers=receivers, active=active)
+                                 receivers=receivers, active=active,
+                                 websocket=websocket)
 
-@web.route("/playing/<receiver>/<directory>/<media_info>")
+@web.route("/medusa/playing/<receiver>/<directory>/<media_info>")
 def playing_start_page(receiver, directory, media_info):
     """
     Update the database for the Receiver with the basic media information,
@@ -583,9 +593,9 @@ def playing_start_page(receiver, directory, media_info):
     with communicate:
         communicate.send((action, media))
 
-    return flask.redirect("/playing/%s" % (receiver))
+    return flask.redirect("/medusa/playing/%s" % (receiver))
 
-@web.route("/playing/time/<receiver>")
+@web.route("/medusa/playing/time/<receiver>")
 def playing_time_page(receiver):
     """
     Provide a browser with the currently elapsed time through a WebSocket.
@@ -652,7 +662,7 @@ def playing_time_page(receiver):
 
     return "0"
 
-@web.route("/playing/tracks/<receiver>/<track_selection>")
+@web.route("/medusa/playing/tracks/<receiver>/<track_selection>")
 def playing_tracks_page(receiver, track_selection):
     """
     Return the Playing Tracks page.
@@ -694,8 +704,8 @@ def playing_tracks_page(receiver, track_selection):
                                  track_selection=track_selection,
                                  tracks=tracks)
 
-@web.route("/action/<receiver>/<action>")
-@web.route("/action/<receiver>/<action>/<option>")
+@web.route("/medusa/action/<receiver>/<action>")
+@web.route("/medusa/action/<receiver>/<action>/<option>")
 def playing_action_page(receiver, action, option=None):
     """
     Return a redirect to the Receiver Playing page, or Browse page in the
@@ -751,14 +761,14 @@ def playing_action_page(receiver, action, option=None):
 
     # Playback has ended, so redirect to the Browse page instead.
     if action == "stop":
-        redirect_url = "/browse"
+        redirect_url = "/medusa/browse"
 
     else:
-        redirect_url = "/playing/%s" % (receiver)
+        redirect_url = "/medusa/playing/%s" % (receiver)
 
     return flask.redirect(redirect_url)
 
-@web.route("/viewed")
+@web.route("/medusa/viewed")
 def viewed_page():
     """
     Return the Viewed page.
@@ -797,8 +807,8 @@ def viewed_page():
 
     return flask.render_template("viewed.html", data=data)
 
-@web.route("/admin")
-@web.route("/admin/<receiver>")
+@web.route("/medusa/admin")
+@web.route("/medusa/admin/<receiver>")
 def admin_page(receiver=None):
     """
     Return the Admin page.

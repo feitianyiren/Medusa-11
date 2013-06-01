@@ -20,7 +20,7 @@
 
         <div class="main_title">{{ data["title"] }}</div>
 
-        <a href='/browse/{{ directory }}/{{ data["show"] }}/{{ data["season"] }}'>
+        <a href='/medusa/browse/{{ directory }}/{{ data["show"] }}/{{ data["season"] }}'>
             {{ data["show"] }}
         </a>
 
@@ -66,7 +66,7 @@
             <div class="main_content">
 
                 <a class="main_button main_button_wide"
-                   href="/playing/{{ receiver["host"] }}/{{ directory }}/{{ data["media_info"] }}">
+                   href="/medusa/playing/{{ receiver["host"] }}/{{ directory }}/{{ data["media_info"] }}">
 
                 {% if data["time_viewed"] %}
                     Resume
