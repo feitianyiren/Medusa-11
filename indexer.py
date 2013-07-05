@@ -57,7 +57,9 @@ def main():
         directory = path.join(options.source_mount, drc)
 
         # Get a list of all files contained within the directory.
+        #
         listing = lister.Listing()
+
         listing.list_directories_recursive([directory])
 
         # And add them to the database if not already found.

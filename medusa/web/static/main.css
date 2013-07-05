@@ -11,6 +11,12 @@ body {
     margin-left: auto;
     margin-right: auto;
 }
+.right {
+    float: right;
+}
+
+/* ------------------------------------------------------------------------- */
+
 a {
     text-decoration: none;
     color: #373737;
@@ -18,9 +24,8 @@ a {
 a:hover {
     cursor: pointer;
 }
-.right {
-    float: right;
-}
+
+/* ------------------------------------------------------------------------- */
 
 #buttons {
     border-bottom: 2px solid #bbb;
@@ -55,6 +60,8 @@ a:hover {
     text-shadow: 0px 2px 3px #f8f8f8;
 }
 
+/* ------------------------------------------------------------------------- */
+
 .search {
     margin-top: 8px;
     background-color: #808080;
@@ -76,6 +83,8 @@ a:hover {
     background-color: #f1f1f1;
     border: none;
 }
+
+/* ------------------------------------------------------------------------- */
 
 .result {
     display: block;
@@ -101,6 +110,8 @@ a:hover {
     background-color: #666;
     background: -webkit-linear-gradient(bottom, #666, #999);
 }
+
+/* ------------------------------------------------------------------------- */
 
 .main_content {
     margin-top: 8px;

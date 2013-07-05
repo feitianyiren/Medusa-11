@@ -52,6 +52,7 @@ def prepare_pid(process_name):
     """
 
     # This will only work on Linux.
+    #
     if config.platform != "linux2":
         return None
 
@@ -107,7 +108,9 @@ def media_watcher():
             state, time_elapsed, time_total = communicate.receive()
 
         # Convert from seconds to whole minutes.
+        #
         time_elapsed = int(round(int(time_elapsed) / 60))
+
         time_total = int(round(int(time_total) / 60))
 
         # Publish the status for the Webmote to receive, if it has changed.
@@ -202,12 +205,15 @@ class Player(QtGui.QMainWindow):
         # Start listening for actions from the Webmote.
         #
         receiver = Receiver()
+
         receiver.receive.connect(self.process)
+
         receiver.start()
 
         # Create a VLC media player.
         #
         self.instance = vlc.Instance("--no-xlib")
+
         self.media_player = self.instance.media_player_new()
 
         # Initialize the GUI.
@@ -219,6 +225,8 @@ class Player(QtGui.QMainWindow):
         window.
         """
 
+        self.window = QtGui.QWidget(self)
+
         self.setWindowTitle("Medusa")
 
         self.resize(1280, 720)
@@ -226,17 +234,21 @@ class Player(QtGui.QMainWindow):
         # Center the window on the screen.
         #
         frame = self.frameGeometry()
-        center = QtGui.QDesktopWidget().availableGeometry().center()
-        frame.moveCenter(center)
-        self.move(frame.topLeft())
 
-        self.window = QtGui.QWidget(self)
+        center = QtGui.QDesktopWidget().availableGeometry().center()
+
+        frame.moveCenter(center)
+
+        self.move(frame.topLeft())
 
         # Make the window background black.
         #
         palette = self.window.palette()
+
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
+
         self.window.setPalette(palette)
+
         self.window.setAutoFillBackground(True)
 
         # Point VLC to the window; different for each platform.
@@ -264,6 +276,7 @@ class Player(QtGui.QMainWindow):
 
         if self.state == "Ended":
             self.stop()
+
             api.action("stop")
 
         log.write("Performing action '%s'." % (self.action))
@@ -313,6 +326,7 @@ class Player(QtGui.QMainWindow):
             media_partial, time_viewed, directory, media_info = self.option
 
             media = Media(directory, media_info)
+
             media.get_media_file(media_partial)
 
             self.queue.extend(media.parts)
@@ -322,6 +336,7 @@ class Player(QtGui.QMainWindow):
         # Set the media file in the player.
         #
         media_ready = self.instance.media_new(media_file)
+
         self.media_player.set_media(media_ready)
 
         api.action("begin", (directory, media_info))
@@ -330,6 +345,7 @@ class Player(QtGui.QMainWindow):
         #
         if self.state not in ["Playing", "Paused"]:
             media_watch = Process(target=media_watcher)
+
             media_watch.start()
 
         self.media_player.play()
@@ -342,8 +358,10 @@ class Player(QtGui.QMainWindow):
         # Reset the audio volume to default.
         #
         self.mute()
+
         if self.media_player.audio_get_mute():
             self.mute()
+
         self.media_player.audio_set_volume(config.default_volume)
 
         # Display the GUI in fullscreen.
@@ -379,6 +397,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_up(self):
         current_volume = self.media_player.audio_get_volume()
+
         target_volume = current_volume + config.volume_increment
 
         if target_volume > 200:
@@ -390,6 +409,7 @@ class Player(QtGui.QMainWindow):
 
     def volume_down(self):
         current_volume = self.media_player.audio_get_volume()
+
         target_volume = current_volume - config.volume_increment
 
         if current_volume < 30:
@@ -407,6 +427,7 @@ class Player(QtGui.QMainWindow):
 
     def get_time(self):
         time_elapsed = str(int(self.media_player.get_time()) / 1000)
+
         time_total = str(int(self.media_player.get_length()) / 1000)
 
         return time_elapsed, time_total
@@ -457,13 +478,16 @@ class Media(object):
 
         if "Downloads-" in media_partial:
             media_partial = media_partial.strip("Downloads-/")
+
             media_mount = options.downloads_mount
 
         if "Temporary-" in media_partial:
             media_partial = media_partial.strip("Temporary-/")
+
             media_mount = options.temporary_mount
 
         media_file = os.path.join(media_mount, media_partial)
+
         self.media_file = os.path.normpath(media_file)
 
         if not os.path.exists(self.media_file):
@@ -491,6 +515,7 @@ class Media(object):
 
         for fle in os.listdir(media_directory):
             extension = os.path.splitext(fle)[1]
+
             extension = extension.lstrip(".").lower()
 
             if extension in config.video_extensions:

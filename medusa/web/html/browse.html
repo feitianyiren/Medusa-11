@@ -5,6 +5,7 @@
 <script>
 
 	// Updates the search results on each key press.
+	//
 	function live_search(term)
 	{
 		var search = "/medusa/search";
@@ -17,10 +18,12 @@
 
 			{% else %}
 				search += "/television/" + show;
+
 			{% endif %}
 
 		{% elif directory %}
 			search += "/{{ directory }}";
+
 		{% endif %}
 
 		if (term != "")
@@ -45,15 +48,14 @@
 
 {% if (directory) and (directory != "television") and (directory != "new") %}
 
-	<div class="search">
+<div class="search">
 
-		<input type="text"
-			   class="input_prefocus"
-			   value="Search {{ directory.title() }}"
-			   onfocus="this.value = ''; this.className = '';"
-			   onkeyup="live_search(this.value);">
+	<input type="text" class="input_prefocus"
+	       value="Search {{ directory.title() }}"
+		   onfocus="this.value = ''; this.className = '';"
+		   onkeyup="live_search(this.value);">
 
-	</div>
+</div>
 
 {% endif %}
 

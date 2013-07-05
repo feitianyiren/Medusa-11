@@ -10,10 +10,8 @@ import configger as config
 
 #------------------------------------------------------------------------------
 
-logging.basicConfig(filename=config.log_file,
-                    level=logging.INFO,
-                    format="%(asctime)s %(message)s",
-                    datefmt="%d/%m %H:%M:%S")
+logging.basicConfig(filename=config.log_file, level=logging.INFO,
+                    format="%(asctime)s %(message)s", datefmt="%d/%m %H:%M:%S")
 
 #------------------------------------------------------------------------------
 
@@ -25,7 +23,9 @@ def error(line):
 
 def clean_line(line):
     if " - - " in line: line = line.partition(" - - ")[-1]
+
     if "] " in line: line = line.partition("] ")[-1]
+
     if '"' in line: line = line.replace('"', "")
 
     return line.strip("\n")

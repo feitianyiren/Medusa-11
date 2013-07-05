@@ -180,6 +180,7 @@ class Database(object):
             row = self.cursor.fetchone()
 
             # If it already has an entry, great.
+            #
             try:
                 row["media_info"]
 
@@ -229,10 +230,12 @@ class Database(object):
         #
         try:
             date_played = row["date_played"]
+
             time_viewed = row["time_viewed"]
 
         except TypeError:
             date_played = None
+
             time_viewed = None
 
         data = {"date_played": date_played,
@@ -242,6 +245,7 @@ class Database(object):
 
     def select_disc(self, media_info):
         date_played = None
+
         time_viewed = None
 
         data = {"date_played": date_played,
@@ -268,7 +272,9 @@ class Database(object):
 
         try:
             # 'title' and 'director' are decoded for UTF-8.
-            row["title"]    = self.decode_string(row["title"])
+            #
+            row["title"] = self.decode_string(row["title"])
+
             row["director"] = self.decode_string(row["director"])
 
         except TypeError:
@@ -297,9 +303,12 @@ class Database(object):
 
         try:
             # 'season' and 'episode' also return two padded versions.
-            row["title"]          = self.decode_string(row["title"])
-            row["show"]           = self.decode_string(row["show"])
+            row["title"] = self.decode_string(row["title"])
+
+            row["show"] = self.decode_string(row["show"])
+
             row["season_padded"]  = str(row["season"]).zfill(2)
+
             row["episode_padded"] = str(row["episode"]).zfill(2)
 
         except TypeError:
@@ -321,8 +330,10 @@ class Database(object):
                             OR title_clean like ?
                             OR director like ?
                             OR director_clean like ?
+                            OR year like ?
                             ORDER BY title asc
                             """, (term,
+                                  term,
                                   term,
                                   term,
                                   term))
@@ -331,8 +342,10 @@ class Database(object):
 
         for row in rows:
             row["directory"] = "Film"
-            row["title"]     = self.decode_string(row["title"])
-            row["director"]  = self.decode_string(row["director"])
+
+            row["title"] = self.decode_string(row["title"])
+
+            row["director"] = self.decode_string(row["director"])
 
             data.append(row)
 
@@ -411,9 +424,13 @@ class Database(object):
 
         for row in rows:
             row["directory"] = "Television"
+
             row["title"] = self.decode_string(row["title"])
+
             row["show"] = self.decode_string(row["show"])
+
             row["season_padded"] = str(row["season"]).zfill(2)
+
             row["episode_padded"] = str(row["episode"]).zfill(2)
 
             data.append(row)

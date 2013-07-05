@@ -27,6 +27,7 @@ hostname = gethostname()
 # Read in the configuration file.
 #
 config_file = join(base_path, "files/medusa_%s.cfg" % hostname.lower())
+
 if not exists(config_file):
     config_file = join(base_path, "files/medusa.cfg")
 
@@ -35,4 +36,5 @@ locals().update(read_config(config_file))
 # Get the full path to the database and log files.
 #
 database_file = join(base_path, database_file)
+
 log_file = join(base_path, log_file)

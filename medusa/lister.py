@@ -24,6 +24,7 @@ class Listing(object):
         #
         for f in filter(lambda x: not x.startswith("."), listdir(directory)):
             # And ignore files in the ignore list.
+            #
             if f not in config.ignore_files:
                 yield "%s/%s" % (directory, f)                     
 
@@ -94,6 +95,7 @@ class Naming(object):
                               False)
 
         # Can't do much with raw DVDs.
+        #
         if "VIDEO_TS" in film:
             return data
 
@@ -102,21 +104,29 @@ class Naming(object):
         extension = extension.strip(".")
 
         # Pull the year out.
+        #
         match = re.search("\(\d{4}\) - ", filename)
+
         year = match.group(0)
 
         filename = filename.split(year)
 
         # Get rid of the 'Part' part.
+        #
         if "Part " in filename[1]:
             filename[1] = re.sub("Part \d* - ", "", filename[1])
 
         if self.check_video_extension(extension):
             data["title"] = filename[0].strip()
+
             data["title_clean"] = self.clean_string(data["title"])
+
             data["director"] = filename[1].strip(" - ")
+
             data["director_clean"] = self.clean_string(data["director"])
+
             data["year"] = year.strip("(").strip(") - ")
+
             data["extension"] = extension
 
         return data
@@ -141,11 +151,15 @@ class Naming(object):
                               False)
 
         # Pull out the year.
+        #
         match = re.search("\(\d{4}\)", episode)
+        
         year = match.group(0).strip("(").strip(")")
 
         # And then the season.
+        #
         match = re.search("\/S\d\d\/", episode)
+        
         season = match.group(0).strip("/S").strip("/")
 
         filename, extension = path.splitext(path.basename(episode))
@@ -156,10 +170,15 @@ class Naming(object):
 
         if self.check_video_extension(extension):
             data["title"] = " - ".join(filename[2:])
+
             data["show"] = filename[0]
+
             data["year"] = year
+
             data["season"]  = season
+
             data["episode"] = filename[1]
+
             data["extension"] = extension
 
         return data
@@ -205,6 +224,7 @@ class Naming(object):
         """Returns the file path to a Television episode."""
 
         show = "%s (%s)" % (data["show"], data["year"])
+
         season = "S%s" % data["season_padded"]
 
         media_directory = path.join(data["directory"].title(), show, season)

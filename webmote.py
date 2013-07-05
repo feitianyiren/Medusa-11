@@ -26,16 +26,16 @@ implemented. All directories are handled separately due to their discrepant
 file naming schemes and folder structures.
 """
 
-import os.path
+import os
 from time import (strptime,
                   strftime)
 import argparse
 
 import simplejson as json
+import flask
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 from gevent import sleep as gevent_sleep
-import flask
 
 from medusa import (configger as config,
                     logger as log,
@@ -45,8 +45,7 @@ from medusa import (configger as config,
 
 #------------------------------------------------------------------------------
 
-web = flask.Flask(__name__,
-                  static_folder=config.static_folder,
+web = flask.Flask(__name__, static_folder=config.static_folder,
                   static_url_path="/medusa/static",
                   template_folder=config.template_folder)
 
@@ -64,18 +63,15 @@ def main():
     log.write("Checking Receivers.")
 
     with database:
-        receivers = database.select_receivers()
-
-    check_alive_receivers(receivers)
+        check_alive_receivers(database.select_receivers())
 
     log.write("Starting web server.")
 
     # Run the web server using Gevent with a WebSocket handler available.
     #
-    server = WSGIServer((config.webmote_ip, config.webmote_port),
-                        web,
-                        handler_class=WebSocketHandler,
-                        log=log)
+    server = WSGIServer((config.webmote_ip, config.webmote_port), web,
+                        handler_class=WebSocketHandler, log=log)
+
     server.serve_forever()
 
 #------------------------------------------------------------------------------
@@ -104,6 +100,7 @@ def check_alive_receivers(receivers):
                 # The content of the status check is not important.
                 communicate.receive()
 
+            # Keep track of alive receivers.
             alive_receivers.append(rcv)
 
         except IOError as error:
@@ -128,7 +125,7 @@ def count_active_receivers():
     active_receiver = None
 
     with database:
-        # Get all alive Receivers.
+        # Get all Receivers.
         receivers = database.select_receivers()
 
         for rcv in receivers:
@@ -155,7 +152,6 @@ def begin_playing_receiver(receiver, directory, media_info):
 
     database.update_receiver_status(receiver, "playing")
 
-    # Updates the last played time stamp for the media.
     database.update_media_played(directory, media_info)
 
     database.update_media_elapsed(directory, media_info, 0)
@@ -219,18 +215,22 @@ def base_page():
 @web.route("/medusa/")
 def index_page():
     """
-    Return a redirect from the Index page.
+    Redirect to the most appropriate page, depending on context.
 
     If a single Receiver is active, redirect to its Playing (control) page.
     If multiple Receivers are active, redirect to the Receiver page to choose.
     If no Receivers are active, redirect to the Browse page.
     """
 
+    # This allows the index page to be bookmarked without redirecting.
+    #
     bookmark = False
 
     if bookmark:
         return flask.render_template("browse.html", directory=None)
 
+    # Determine the page to redirect to.
+    #
     active_count, active_receiver = count_active_receivers()
 
     if active_count == 1:
@@ -359,7 +359,7 @@ def search_film_page(term=""):
 
     # Otherwise filter the selection by a search term + wild card.
     else:
-        term = "%s%%" % (term)
+        term = "%%%s%%" % (term)
 
     with database:
         data = database.select_films(term)
@@ -523,7 +523,8 @@ def playing_page(receiver=None):
             # Now we have a list of active Receivers only.
             receivers = receivers_active
 
-    websocket = "%s:%s" % (config.hostname, config.webmote_port)
+    websocket = "%s:%s" % (communicator.get_host_ip(config.hostname),
+                           config.webmote_port)
 
     return flask.render_template("playing.html", receiver=receiver,
                                  directory=directory, data=data,
@@ -572,7 +573,7 @@ def playing_start_page(receiver, directory, media_info):
         media_file = naming.build_episode_path(data)
 
     elif directory == "disc":
-	media_file = "disc"
+        media_file = "disc"
 
     # The action to send through that tells the Receiver to begin playback.
     action = "play"
@@ -619,11 +620,14 @@ def playing_time_page(receiver):
 
         except Exception as excp:
             state = "Unknown"
+
             time_elapsed = 0
+
             time_total = 0
 
         # Convert from seconds to whole minutes.
         time_elapsed = int(round(int(time_elapsed) / 60))
+
         time_total = int(round(int(time_total) / 60))
 
     # Subscribe to status updates from the Receiver.
@@ -842,6 +846,8 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description=help)
 
+    parser.add_argument("-s", "--source_mount",
+                        action="store", type=unicode, default=None)
     parser.add_argument("-d", "--downloads_mount",
                         action="store", type=unicode, default=None)
     parser.add_argument("-t", "--temporary_mount",

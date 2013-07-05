@@ -4,13 +4,13 @@
 
 {% if receiver %}
 
-    <div class="main_content">
+<div class="main_content">
 	
-        <div class="main_text">
-            {{ data["name"] }} ({{ receiver }}) is alive!
-        </div>
-
+    <div class="main_text">
+        {{ data["name"] }} ({{ receiver }}) is alive!
     </div>
+
+</div>
 
 {% else %}
 
@@ -18,26 +18,26 @@
 
         {% for receiver in receivers %}
 
-            <div class="main_content">
+        <div class="main_content">
 
-                <a class="main_button main_button_wide"
-                   href="/medusa/admin/{{ receiver["host"] }}">
-                    {{ receiver["name"] }}
-                </a>
+            <a class="main_button main_button_wide"
+               href="/medusa/admin/{{ receiver["host"] }}">
+                {{ receiver["name"] }}
+            </a>
 
-            </div>
+        </div>
 
         {% endfor %}
 
     {% else %}
 
-        <div class="main_content">
+    <div class="main_content">
 
-            <div class="main_text">
-                No Receivers found.
-            </div> 
+        <div class="main_text">
+            No Receivers found.
+        </div> 
 
-        </div>
+    </div>
 
     {% endif %}
 

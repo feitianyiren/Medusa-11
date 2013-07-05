@@ -4,86 +4,83 @@
 
 {% if directory == "film" %}
 
-    <div class="main_content">
+<div class="main_content">
 
-        <div class="main_title">{{ data["title"] }}</div>
+    <div class="main_title">{{ data["title"] }}</div>
 
-        <span>{{ data["director"] }}</span>
+    <span>{{ data["director"] }}</span>
 
-        <div class="right">{{ data["year"] }}</div>
+    <div class="right">{{ data["year"] }}</div>
 
-    </div>
+</div>
 
 {% elif directory == "television" %}
 
-    <div class="main_content">
+<div class="main_content">
 
-        <div class="main_title">{{ data["title"] }}</div>
+    <div class="main_title">{{ data["title"] }}</div>
 
-        <a href='/medusa/browse/{{ directory }}/{{ data["show"] }}/{{ data["season"] }}'>
-            {{ data["show"] }}
-        </a>
+    <a href='/medusa/browse/{{ directory }}/{{ data["show"] }}/{{ data["season"] }}'>
+        {{ data["show"] }}
+    </a>
 
-        <div class="right">
-            S{{ data["season_padded"] }}E{{ data["episode_padded"] }}
-        </div>
-
+    <div class="right">
+        S{{ data["season_padded"] }}E{{ data["episode_padded"] }}
     </div>
+
+</div>
 
 {% elif directory == "new" %}
 
-    <div class="main_content">
-        <div class="main_title">{{ data["media_info" ]}}</div>
-    </div>
+<div class="main_content">
+    <div class="main_title">{{ data["media_info" ]}}</div>
+</div>
 
 {% elif directory == "disc" %}
 
-    <div class="main_content">
-        <div class="main_title">Disc</div>
-    </div>
-
+<div class="main_content">
+    <div class="main_title">Disc</div>
+</div>
 
 {% endif %}
 
-    {% block playing %}
+{% block playing %}
 
-    {% if data["date_played"] %}
+{% if data["date_played"] %}
 
-        <div class="main_content">
+<div class="main_content">
 
-            <div class="main_time">
-                Last played on {{ data["date_played"] }}.
-            </div>
+    <div class="main_time">
+        Last played on {{ data["date_played"] }}.
+    </div>
 
-        </div>
+</div>
 
-    {% endif %}
+{% endif %}
 
-    {% if receivers[0] %}
+{% if receivers[0] %}
 
-        {% for receiver in receivers %}
+    {% for receiver in receivers %}
 
-            <div class="main_content">
+    <div class="main_content">
 
-                <a class="main_button main_button_wide"
-                   href="/medusa/playing/{{ receiver["host"] }}/{{ directory }}/{{ data["media_info"] }}">
+        <a class="main_button main_button_wide"
+           href="/medusa/playing/{{ receiver["host"] }}/{{ directory }}/{{ data["media_info"] }}">
+            {% if data["time_viewed"] %}
+                Resume
+            {% else %}
+                Play
+            {% endif %}
 
-                {% if data["time_viewed"] %}
-                    Resume
-                {% else %}
-                    Play
-                {% endif %}
+            in {{ receiver["name"] }}
+        </a>
 
-                    in {{ receiver["name"] }}
+    </div>
 
-                </a>
+    {% endfor %}
 
-            </div>
+{% endif %}
 
-        {% endfor %}
-
-    {% endif %}
-
-    {% endblock %}
+{% endblock %}
 
 {% endblock %}

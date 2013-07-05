@@ -4,185 +4,190 @@
 
 {% if receiver %}
 
-    <script>
+<script>
 
-        // Control the switching of option menus.
-        function toggle_options()
+    // Control the switching of option menus.
+    //
+    function toggle_options()
+    {
+        var display_status = $(".main_advanced_options").css("display");
+
+        if (display_status == "none")
         {
-            var display_status = $(".main_advanced_options").css("display");
-
-            if (display_status == "none")
-            {
-                $(".main_basic_options").css("display", "none");
-                $(".main_advanced_options").css("display", "inherit");
-                $(".main_track_selection").html("");
-                $(".main_toggle_options").html("Basic Options");
-            }
-
-            else
-            {
-                $(".main_basic_options").css("display", "inherit");
-                $(".main_advanced_options").css("display", "none");
-                $(".main_track_selection").html("");
-                $(".main_toggle_options").html("Advanced Options");
-            };
+            $(".main_basic_options").css("display", "none");
+            $(".main_advanced_options").css("display", "inherit");
+            $(".main_track_selection").html("");
+            $(".main_toggle_options").html("Basic Options");
+        }
+        else
+        {
+            $(".main_basic_options").css("display", "inherit");
+            $(".main_advanced_options").css("display", "none");
+            $(".main_track_selection").html("");
+            $(".main_toggle_options").html("Advanced Options");
         };
+    };
 
-        // Bring up and fill track (audio or subtitle) selection.
-        function toggle_track_selection(track_selection)
+    // Bring up and fill track (audio or subtitle) selection.
+    //
+    function toggle_track_selection(track_selection)
+    {
+        var url = "/medusa/playing/tracks/{{ receiver }}/" + track_selection
+
+        $.get(url, function(data)
         {
-            var url = "/medusa/playing/tracks/{{ receiver }}/" + track_selection
-
-            $.get(url, function(data)
-            {
-                $(".main_advanced_options").css("display", "none");
-                $(".main_track_selection").html(data);
-                $(".main_toggle_options").html("Advanced Options");
-            });
-        };
-
-        // Update the media time elapsed.
-        function update_time(data)
-        {
-            var info = JSON.parse(data);
-
-            // If '-1' playback has finished, so reload the page.
-            if (info.time_elapsed == "-1")
-            {
-                window.location.reload();
-            };
-
-            var time = "";
-            time += info.time_elapsed;
-            time += " minutes elapsed out of ";
-            time += info.time_total;
-            time += ".";
-
-            $(".main_time").html(time);
-        };
-
-        // Perform an action (control) in the background.
-        function perform_action(action)
-        {
-            $.get("/medusa/action/{{ receiver }}/" + action);
-        };
-
-        // Open a web-socket to receive playing time updates.
-        $(document).ready(function()
-        {
-            var url = "ws://{{ websocket }}/medusa/playing/time/{{ receiver }}";
-            var web_socket = new WebSocket(url);
-
-            web_socket.onmessage = function(message) {
-                update_time(message.data);
-            };
-
-            window.onbeforeunload = function() {
-                web_socket.onclose = function () {};
-                web_socket.close();
-                return null;
-            };
+            $(".main_advanced_options").css("display", "none");
+            $(".main_track_selection").html(data);
+            $(".main_toggle_options").html("Advanced Options");
         });
+    };
 
-    </script>
+    // Update the media time elapsed.
+    //
+    function update_time(data)
+    {
+        var info = JSON.parse(data);
+
+        // If '-1' playback has finished, so reload the page.
+        //
+        if (info.time_elapsed == "-1")
+        {
+            window.location.reload();
+        };
+
+        var time = "";
+        time += info.time_elapsed;
+        time += " minutes elapsed out of ";
+        time += info.time_total;
+        time += ".";
+
+        $(".main_time").html(time);
+    };
+
+    // Perform an action (control) in the background.
+    //
+    function perform_action(action)
+    {
+        $.get("/medusa/action/{{ receiver }}/" + action);
+    };
+
+    // Open a web-socket to receive playing time updates.
+    //
+    $(document).ready(function()
+    {
+        var url = "ws://{{ websocket }}/medusa/playing/time/{{ receiver }}";
+        var web_socket = new WebSocket(url);
+
+        web_socket.onmessage = function(message) {
+            update_time(message.data);
+        };
+
+        window.onbeforeunload = function() {
+            web_socket.onclose = function () {};
+            web_socket.close();
+            return null;
+        };
+    });
+
+</script>
+
+<div class="main_content">
+
+    <div class="main_time">
+        Determining time elapsed.
+    </div>
+
+</div>
+
+<div class="main_basic_options">
 
     <div class="main_content">
 
-        <div class="main_time">
-            Determining time elapsed.
-        </div>
+        <a class="main_button main_button_wide"
+           href="/medusa/action/{{ receiver }}/pause">
 
-    </div>
+        {% if data["status"] == "paused" %}
+            Resume
+        {% else %}
+            Pause
+        {% endif %}
 
-    <div class="main_basic_options">
-
-        <div class="main_content">
-
-            <a class="main_button main_button_wide"
-               href="/medusa/action/{{ receiver }}/pause">
-
-            {% if data["status"] == "paused" %}
-                Resume
-            {% else %}
-                Pause
-            {% endif %}
-
-            </a>
-
-        </div>
-
-        <div class="main_content">
-
-            <a class="main_button main_settings" href="#"
-               onclick="perform_action('volume_down');">
-                Volume -
-            </a>
-
-            <a class="main_button main_settings right" href="#"
-               onclick="perform_action('volume_up');">
-                Volume +
-            </a>
-
-        </div>
-
-        <div class="main_content">
-
-            <a class="main_button main_button_bottom" href="#"
-               onclick="perform_action('rewind');">
-                Rewind
-            </a>
-
-            <a class="main_button main_button_bottom right"
-               href="/medusa/action/{{ receiver }}/stop">
-                Stop
-            </a>
-
-        </div>
-    
-    </div>
-
-    <div class="main_advanced_options">
-
-        <div class="main_content">
-
-            <a class="main_button main_settings" href="#"
-               onclick="toggle_track_selection('subtitle');">
-                Subtitle Track
-            </a>
-
-            <a class="main_button main_settings right" href="#"
-               onclick="toggle_track_selection('audio');">
-                Audio Track
-            </a>
-
-        </div>
-
-        <div class="main_content">
-
-            <a class="main_button main_settings"
-               href="/medusa/action/{{ receiver }}/reset">
-                Restart
-            </a>
-
-            <a class="main_button main_settings right"
-               href="/medusa/action/{{ receiver }}/mute">
-                Mute
-            </a>
-
-        </div>
-
-    </div>
-
-    <div class="main_track_selection"></div>
-
-    <div class="main_content">
-
-        <a class="main_toggle_options" href="#"
-           onclick="toggle_options();">
-            Advanced Options
         </a>
 
     </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_settings" href="#"
+           onclick="perform_action('volume_down');">
+            Volume -
+        </a>
+
+        <a class="main_button main_settings right" href="#"
+           onclick="perform_action('volume_up');">
+            Volume +
+        </a>
+
+    </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_button_bottom" href="#"
+           onclick="perform_action('rewind');">
+            Rewind
+        </a>
+
+        <a class="main_button main_button_bottom right"
+           href="/medusa/action/{{ receiver }}/stop">
+            Stop
+        </a>
+
+    </div>
+    
+</div>
+
+<div class="main_advanced_options">
+
+    <div class="main_content">
+
+        <a class="main_button main_settings" href="#"
+           onclick="toggle_track_selection('subtitle');">
+            Subtitle Track
+        </a>
+
+        <a class="main_button main_settings right" href="#"
+           onclick="toggle_track_selection('audio');">
+            Audio Track
+        </a>
+
+    </div>
+
+    <div class="main_content">
+
+        <a class="main_button main_settings"
+           href="/medusa/action/{{ receiver }}/reset">
+            Restart
+        </a>
+
+        <a class="main_button main_settings right"
+           href="/medusa/action/{{ receiver }}/mute">
+            Mute
+        </a>
+
+    </div>
+
+</div>
+
+<div class="main_track_selection"></div>
+
+<div class="main_content">
+
+    <a class="main_toggle_options" href="#"
+       onclick="toggle_options();">
+        Advanced Options
+    </a>
+
+</div>
 
 {% else %}
 
@@ -192,14 +197,14 @@
 
             {% if receiver["status"] %}
 
-                <div class="main_content">
+            <div class="main_content">
 
-                    <a class="main_button main_button_wide"
-                       href="/medusa/playing/{{ receiver["host"] }}">
-                        {{ receiver["name"] }}
-                    </a>
+                <a class="main_button main_button_wide"
+                   href="/medusa/playing/{{ receiver["host"] }}">
+                    {{ receiver["name"] }}
+                </a>
 
-                </div>
+            </div>
 
             {% endif %}
 
@@ -207,11 +212,11 @@
 
     {% else %}
 
-        <div class="main_content">
+    <div class="main_content">
 
-            <div class="main_text">No active Receivers found.</div>
+        <div class="main_text">No active Receivers found.</div>
 
-        </div>
+    </div>
 
     {% endif %}
 

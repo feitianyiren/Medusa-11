@@ -21,6 +21,7 @@
     <script>
 
         // Determines the current page and changes the menu accordingly.
+        //
         $(document).ready(function()
         {
             var current_url = window.location.pathname.split("/");
@@ -50,12 +51,10 @@
             {
                 current_page = "new";
             }
-
             else if (current_url[2] == "info")
             {
                 current_page = "browse";
             }
-
             else
             {
                 current_page = current_url[2];
@@ -129,7 +128,7 @@
 
     <div id="main">
 
-    {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
 
     </div>
 
