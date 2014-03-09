@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set category = item["category"].lower() %}
+
+<div class="boxFull">
+
+    {% if category == "television" %}
+        {% set title = item["name_four"] %}
+        {% set sub_title = item["name_one"] %}
+        {% set sub_title_link = "/medusa/browse/television/" ~ item["name_one"] %}
+        {% set right = "S" ~ item["season"] ~ "E" ~ item["episode"] %}
+        {% set right_link = "/medusa/browse/television/" ~ item["name_one"] ~ "/" ~ item["name_two"] %}
+    {% elif category == "new" %}
+        {% set title = item["name"] %}
+    {% else %}
+        {% set title = item["name_one"] %}
+        {% set sub_title = item["name_two"]|join(", ") %}
+        {% set right = item["year"] %}
+    {% endif %}
+
+    <div class="mainContentsBox">
+        <div class="contentsText contentsTitle">
+            {{ title }}
+        </div>
+        {% if sub_title %}
+        <div class="contentsText">
+            {% if sub_title_link %}
+            <a href="{{ sub_title_link }}">{{ sub_title }}</a>
+            {% else %}
+            {{ sub_title }}
+            {% endif %}
+            <div class="floatRight">
+                {% if right_link %}
+                <a href="{{ right_link }}">{{ right }}</a>
+                {% else %}
+                {{ right }}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if item["viewed"] %}
+    <div class="mainContentsBox">
+        <div class="contentsText">
+            Last played on {{ item["viewed"] }}.
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="playQueueContainer mainContentsBox">
+        <div class="contentsButtonBox">
+            <div class="contentsButton chooseSnake">
+                {% if item["elapsed"] %}
+                Resume
+                {% else %}
+                Play
+                {% endif %}
+            </div>
+        </div>
+
+    {% if queue %}
+        <div class="contentsButtonBox">
+            <div class="contentsButton chooseSnake">
+                Queue
+            </div>
+        </div>
+    {% endif %}
+    </div>
+
+    {% if item["previous"] or item["next"] %}
+    <div class="mainContentsBox">
+        {% if item["previous"] and item["next"] %}
+        <div class="contentsButtonBoxHalf">
+            <a class="contentsButton"
+               href='/medusa/media/{{ item["previous"] }}'>
+                Previous
+            </a>
+        </div><div class="contentsButtonBoxHalf">
+            <a class="contentsButton"
+               href='/medusa/media/{{ item["next"] }}'>
+                Next
+            </a>
+        </div>
+        {% else %}
+        {% if item["previous"] %}
+        <div class="contentsButtonBox">
+            <a class="contentsButton"
+               href='/medusa/media/{{ item["previous"] }}'>
+                Previous
+            </a>
+        </div>
+        {% endif %}
+        {% if item["next"] %}
+        <div class="contentsButtonBox">
+            <a class="contentsButton"
+               href='/medusa/media/{{ item["next"] }}'>
+                Next
+            </a>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/medusa-media.js') }}"></script>
+
+{% endblock %}

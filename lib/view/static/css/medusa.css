@@ -1,0 +1,183 @@
+body {
+    background-color: #f5f5f5;
+    color: #111;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    margin: 0 0 64px 0;
+}
+a {
+    text-decoration: none;
+    color: #111;
+}
+.floatRight {
+    float: right;
+}
+.boxFull {
+    width: 980px;
+    margin: 0 auto;
+    margin-bottom: 9px;
+}
+
+/* ------------------------------------------------------------------------- */
+
+.navigationMenu {
+    height: 152px;
+}
+.menuButtonBox {
+    display: inline-block;
+    width: 20%;
+    height: 100%;
+}
+.menuButton {
+    display: block;
+    height: 100%;
+    background-color: #e5e5e5;
+    border-style: solid;
+    border-color: #ccc;
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+}
+.menuButtonLeft {
+    border-left-width: 1px;
+}
+.menuButton:hover {
+    cursor: pointer;
+    background-color: #d5d5d5;
+    border-color: #bbb;
+}
+.menuButtonIcon {
+    text-align: center;
+}
+.menuButtonIcon img {
+    margin-top: 12px;
+    width: 80px;
+    opacity: 0.75;
+}
+.menuButtonTitle {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.buttonGap {
+    height: 2px;
+}
+.currentPage .menuButton {
+    background-color: #d5d5d5;
+    border-color: #bbb;
+}
+
+/* ------------------------------------------------------------------------- */
+
+.browseCategoriesBox {
+    display: none;
+}
+.mainContentsBox {
+    display: block;
+    margin-top: 8px;
+    background-color: #e5e5e5;
+    padding: 12px;
+}
+.contentsInput {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    font-size: 40px;
+    padding: 4px 8px 4px 8px;
+}
+.searchInput {
+    width: 922px;
+    margin: 8px 0 8px 8px;
+}
+.searchResults {
+    display: none;
+}
+.contentsText {
+    font-size: 32px;
+    padding: 4px 8px 4px 8px;
+}
+.contentsTitle {
+    font-size: 48px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.contentsName {
+    width: 880px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.contentsYear {
+    margin-top: -38px;
+    margin-right: 8px;
+    font-size: 28px;
+    color: #555;
+}
+.contentsButtonBox {
+    width: 100%;
+    display: inline-block;
+}
+.contentsButtonBoxHalf {
+    width: 50%;
+    display: inline-block;
+}
+.contentsButtonBoxThird {
+    width: 33.3%;
+    display: inline-block;
+}
+.contentsButton {
+    display: block;
+    background-color: #ddd;
+    border-style: solid;
+    border-color: #ccc;
+    border-width: 1px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+    margin: 8px;
+    font-size: 56px;
+    font-weight: bold;
+    text-align: center;
+}
+.contentsButton:hover, .contentsLink:hover {
+    cursor: pointer;
+    background-color: #ccc;
+    border-color: #bbb;
+}
+.progressBar {
+    margin: 8px 0 6px 7px;
+    width: calc(100% - 14px);
+    height: 64px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+}
+.progressBar[value]::-webkit-progress-bar {
+    background-color: #ccc;
+}
+.progressBar[value]::-webkit-progress-value {
+    background-color: #999;
+}
+.progressBarText {
+    position: absolute;
+    font-size: 32px;
+    margin-top: -54px;
+    color: #111;
+    width: 956px;
+    text-align: center;
+    cursor: pointer;
+}
+.advancedOptions, .basicOptions {
+    display: block;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* ------------------------------------------------------------------------- */
+
+.adminSnakes {
+    display: none;
+}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="boxFull">
+
+{% if category %}
+
+    {% for key in items.keys() %}
+        {% set item = items[key] %}
+        {% if category == "television" %}
+            {% set link = "/medusa/browse/television/" ~ item["name_one"] %}
+        {% elif category == "new" %}
+            {% if item["id"] %}
+                {% set link = "/medusa/media/" ~ item["id"] %}
+            {% else %}
+                {% set link = "/medusa/media/new/" ~ item["name_one"] %}
+            {% endif %}
+        {% elif category == "viewed" %}
+            {% if key == item["name_one"] %}
+                {% set link = "/medusa/media/new/" ~ key %}
+            {% else %}
+                {% set link = "/medusa/media/" ~ key %}
+            {% endif %}
+        {% else %}
+            {% set link = "/medusa/media/" ~ key %}
+        {% endif %}
+
+    <a class="mainContentsBox contentsLink" href="{{ link }}">
+        <div class="contentsText contentsName">
+            {{ item["name_one"] }}
+        </div>
+        {% if item["year"] %}
+        <div class="contentsYear floatRight">
+            {{ item["year"] }}
+        </div>
+        {% endif %}
+    </a>
+    {% endfor %}
+
+{% elif seasons %}
+
+    <div class="mainContentsBox">
+        <div class="contentsText contentsTitle">
+            {{ show }}
+        </div>
+    </div>
+
+    {% for season in seasons %}
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/browse/television/{{show}}/{{ season }}">
+       <div class="contentsText contentsName">
+            Season {{ season }}
+        </div>
+    </a>
+    {% endfor %}
+
+{% elif season %}
+
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/browse/television/{{ show }}">
+        <div class="contentsText contentsTitle">
+            {{ show }}
+        </div>
+        <div class="contentsYear floatRight">
+            Season {{ season }}
+        </div>
+    </a>
+
+    {% for episode in episodes %}
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/media/{{ episode['id'] }}">
+        <div class="contentsText contentsName">
+        {{ episode["name_three"] }}. {{ episode["name_four"] }}
+        </div>
+    </a>
+    {% endfor %}
+
+{% else %}
+
+    <div class="browseMenuBox">
+        <div class="mainContentsBox">
+            <input class="contentsInput searchInput"
+                   placeholder="Search Media"></input>
+        </div>
+
+        <div class="boxFull searchResults"></div>
+
+        <div class="menuItems">
+            <div class="mainContentsBox">
+                <div class="contentsButtonBox">
+                    <div class="contentsButton browseMedia">
+                        Browse Media
+                    </div>
+                </div>
+            </div>
+
+            {% if continue_ %}
+            {% if continue_["elapsed"] > 0 %}
+                {% set action = "Resume" %}
+            {% else %}
+                {% set action = "Continue" %}
+            {% endif %}
+
+            <div class="mainContentsBox">
+                <div class="contentsButtonBox">
+                    <a class="contentsButton"
+                       href="/medusa/media/{{ continue_['id'] }}">
+                        {{ action }} {{ continue_["category"] }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="browseCategoriesBox">
+        {% for category in categories %}
+        <div class="mainContentsBox">
+            <div class="contentsButtonBox">
+                <a class="contentsButton"
+                   href="/medusa/browse/{{ category.lower() }}">
+                    {{ category }}
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/medusa-browse.js') }}"></script>
+
+{% endblock %}

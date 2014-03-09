@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if not snake %}
+<div class="adminContent">
+    <div class="boxFull">
+        <div class="mainContentsBox">
+            <div class="contentsButtonBox">
+                <div class="contentsButton showSnakes">Players</div>
+            </div>
+        </div>
+    </div>
+    <div class="boxFull">
+        <div class="mainContentsBox">
+            <div class="contentsButtonBox">
+                <div class="contentsButton refreshMedia">Refresh Media</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/medusa-admin.js') }}"></script>
+
+{% endblock %}

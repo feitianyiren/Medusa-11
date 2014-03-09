@@ -1,0 +1,49 @@
+<div class="boxFull">
+
+    <div class="navigationMenu">
+
+        <div class="menuButtonBox" data-page="browse">
+            <a class="menuButton menuButtonLeft"
+               href="/medusa/browse">
+                <div class="menuButtonIcon">
+                    <img src="{{ url_for('static', filename='img/icon-browse.png') }}">
+                </div>
+                <div class="menuButtonTitle" id="titleBrowse">Browse</div>
+            </a>
+        </div><div class="menuButtonBox" data-page="new">
+            <a class="menuButton"
+               href="/medusa/new">
+                <div class="menuButtonIcon">
+                    <img src="{{ url_for('static', filename='img/icon-new.png') }}">
+                </div>
+                <div class="menuButtonTitle">New</div>
+            </a>
+        </div><div class="menuButtonBox" data-page="playing">
+            <a class="menuButton"
+               href="/medusa/playing">
+                <div class="menuButtonIcon">
+                    <img src="{{ url_for('static', filename='img/icon-playing.png') }}">
+                </div>
+                <div class="menuButtonTitle">Playing</div>
+            </a>
+        </div><div class="menuButtonBox" data-page="viewed">
+            <a class="menuButton"
+               href="/medusa/viewed">
+                <div class="menuButtonIcon">
+                    <img src="{{ url_for('static', filename='img/icon-viewed.png') }}">
+                </div>
+                <div class="menuButtonTitle">Viewed</div>
+            </a>
+        </div><div class="menuButtonBox" data-page="admin">
+            <a class="menuButton"
+               href="/medusa/admin">
+                <div class="menuButtonIcon">
+                    <img src="{{ url_for('static', filename='img/icon-admin.png') }}">
+                </div>
+                <div class="menuButtonTitle">Admin</div>
+            </a>
+        </div>
+
+    </div>
+
+</div>

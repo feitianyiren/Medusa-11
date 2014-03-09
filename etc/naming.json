@@ -1,0 +1,16 @@
+{
+    "Film": {
+        "path": "/mnt/Data/Media/Film",
+        "names": [
+            "{base}/{title} ({year}) - Part {part} - {directors}",
+            "{base}/{title} ({year}) - {directors}"
+        ]
+    },
+    "Television": {
+        "path": "/mnt/Data/Media/Television",
+        "names": [
+            "{base}/{show} ({year})/S{season}/{show} - {episode} - {title}",
+            "{base}/{show} ({year})/S{season}/{show} - {episode}"
+        ]
+    }
+}

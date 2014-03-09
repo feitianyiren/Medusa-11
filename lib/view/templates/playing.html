@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="boxFull">
+
+    <div class="mainContentsBox mediaDetails">
+        <div class="contentsText contentsTitle textTitle">
+            No Media
+        </div>
+        <div class="contentsText textSubTitle"></div>
+    </div>
+
+    {% if advanced %}
+
+    <div class="mainContentsBox advancedContent">
+        <div class="contentsButtonBoxHalf">
+            <div class="contentsButton buttonSubtitles">
+                Subtitle Track
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton buttonAudio">
+                Audio Track
+            </div>
+        </div>
+    </div>
+
+    <div class="mainContentsBox contentsLink">
+        <a class="contentsText basicOptions" href="#">
+            Basic Options
+        </a>
+    </div>
+
+    {% else %}
+
+    <div class="mainContentsBox">
+        <progress class="progressBar" value="0" max="100"></progress>
+        <div class="progressBarText"></div>
+    </div>
+
+    <div class="mainContentsBox">
+        <div class="contentsButtonBoxHalf">
+            <div class="contentsButton buttonPause" data-action="pause">
+                Pause
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton" data-action="stop">
+                Stop
+            </div>
+        </div>
+    </div>
+
+    <div class="mainContentsBox">
+        <div class="contentsButtonBoxThird">
+            <div class="contentsButton" data-action="volume_down">
+                Volume –
+            </div>
+        </div><div class="contentsButtonBoxThird">
+            <div class="contentsButton" data-action="volume_up">
+                Volume +
+            </div>
+        </div><div class="contentsButtonBoxThird">
+            <div class="contentsButton buttonMute" data-action="mute">
+                Mute
+            </div>
+        </div>
+    </div>
+
+    <div class="mainContentsBox contentsLink">
+        <a class="contentsText advancedOptions" href="#">
+            Advanced Options
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/medusa-playing.js') }}"></script>
+
+{% endblock %}
