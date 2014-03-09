@@ -68,9 +68,12 @@ def browse_show(show):
 
     seasons = sorted(seasons)
 
+    continue_ = retrieve.get_continue_media_by_show(show)
+
     return flask.render_template("browse.html",
                                  show=show,
-                                 seasons=seasons)
+                                 seasons=seasons,
+                                 continue_=continue_)
 
 @pages.route("/browse/television/<show>/<season>")
 def browse_season(show, season):

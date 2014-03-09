@@ -120,3 +120,13 @@ def get_continue_media():
                 info["elapsed"] = 0
 
                 return info
+
+def get_continue_media_by_show(show):
+    media_id = Database().select_latest_viewed_by_show(show)
+
+    if not media_id:
+        return
+
+    previous, next = get_nearby_episodes(int(media_id))
+
+    return next

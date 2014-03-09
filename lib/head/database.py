@@ -114,6 +114,15 @@ class Database(object):
 
         return data
 
+    def select_latest_viewed_by_show(self, show):
+        with self.database:
+            data = self.database.select_latest_viewed_by_show(show)
+
+        if data:
+            return data["id"]
+
+    #--------------------------------------------------------------------------
+
     def insert_media(self, media):
         if isinstance(media, dict):
             media = [media]
@@ -139,11 +148,15 @@ class Database(object):
         with self.database:
             self.database.insert_viewed(media_id)
 
+    #--------------------------------------------------------------------------            
+
     def update_viewed(self, media_id, elapsed):
         log.warn("Updating elapsed for %s: %s", media_id, elapsed)
 
         with self.database:
             self.database.update_viewed(media_id, elapsed)
+
+    #--------------------------------------------------------------------------
 
     def delete_media(self, media_ids):
         with self.database:
@@ -357,6 +370,18 @@ class DatabaseConnection(object):
                             """, (media_id,))
 
         return self.cursor.fetchall()
+
+    def select_latest_viewed_by_show(self, show):
+        self.cursor.execute("""
+                            SELECT id
+                            FROM viewed
+                            JOIN media USING (id)
+                            WHERE name_one = ?
+                            ORDER BY viewed DESC
+                            LIMIT 1
+                            """, (show,))
+
+        return self.cursor.fetchone()
 
     #--------------------------------------------------------------------------
 

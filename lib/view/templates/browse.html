@@ -43,6 +43,12 @@
         <div class="contentsText contentsTitle">
             {{ show }}
         </div>
+        {% if continue_ %}
+        <a class="contentsYear floatRight"
+           href="/medusa/media/{{ continue_ }}">
+            Continue
+        </a>
+        {% endif %}
     </div>
 
     {% for season in seasons %}
