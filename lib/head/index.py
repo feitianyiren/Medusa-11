@@ -58,8 +58,10 @@ class IndexThread(threading.Thread):
         self.stop = False
 
     def run(self):
-        while not self.stop:
-            self.index()
+        while True:
+            if not self.stop:
+                self.index()
+
             time.sleep(config.getint("index", "interval"))
 
     def index(self):
