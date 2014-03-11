@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Proxy function calls exposed to the Head during communication.
+"""
+
 import traceback
 
 from lib.medusa.log import log

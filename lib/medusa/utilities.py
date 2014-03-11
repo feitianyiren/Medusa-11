@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Various utilities used by Medusa.
+"""
+
 import os
 import socket
 

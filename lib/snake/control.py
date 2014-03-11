@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Handle actions from the Head with regards to VLC media playback.
+"""
+
 import os
 
 from PyQt4 import QtCore

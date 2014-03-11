@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+The Medusa web interface page routes.
+"""
+
 from collections import OrderedDict
 
 import flask

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Proxy function calls exposed to Snakes during communication.
+"""
+
 from collections import defaultdict
 
 #------------------------------------------------------------------------------

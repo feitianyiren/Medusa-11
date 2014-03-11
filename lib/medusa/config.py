@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Read the configuration file and translate the values to various types.
+"""
+
 import os
 from ConfigParser import ConfigParser
 

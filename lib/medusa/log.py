@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Log to a file.
+"""
+
 import logging as log
 
 from lib.medusa.config import config

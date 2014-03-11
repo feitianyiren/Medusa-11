@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+The API routes through which the Head mediates interaction between the web
+interface, Snakes, and the database.
+"""
+
 import flask
 
 from lib.head.database import Database

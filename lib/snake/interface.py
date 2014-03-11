@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Control the Qt interface that contains the VLC player.
+"""
+
 import sys
 
 from PyQt4 import QtCore

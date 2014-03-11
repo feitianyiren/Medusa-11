@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Support functions used by the web interface to get and format data.
+"""
+
 from collections import OrderedDict
 import datetime
 import os
