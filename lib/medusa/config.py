@@ -6,7 +6,7 @@ from ConfigParser import ConfigParser
 #------------------------------------------------------------------------------
 
 BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-CONFIG_FILE = os.path.join(BASE_PATH, "etc/medusa.cfg")
+CONFIG_FILE = os.path.join(BASE_PATH, "cfg/medusa.cfg")
 
 #------------------------------------------------------------------------------
 

@@ -1,3 +1,4 @@
 Flask
 msgpack-python
 requests
+simplejson
