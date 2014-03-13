@@ -31,6 +31,7 @@ class Control(QtGui.QWidget):
         self.communicate = None
         self.media_id = None
 
+        self.jump_increment = config.getint("snake", "jump_increment")
         self.volume_increment = config.getint("snake", "volume_increment")
         self.volume_max = config.getint("snake", "volume_max")
         self.volume_min = config.getint("snake", "volume_min")
@@ -125,7 +126,7 @@ class Control(QtGui.QWidget):
 
         self.player.audio_toggle_mute()
 
-    def jump(self, seconds):
+    def jump_to(self, seconds):
         elapsed, total = self._get_time()
 
         if elapsed > int(seconds):
@@ -135,6 +136,20 @@ class Control(QtGui.QWidget):
             self.overlay("Jumped Forward")
 
         self.player.set_time(int(seconds) * 1000)
+
+    def jump_forward(self):
+        elapsed, total = self._get_time()
+
+        self.overlay("Jumped Forward")
+
+        self.player.set_time((elapsed + self.jump_increment) * 1000)
+
+    def jump_backward(self):
+        elapsed, total = self._get_time()
+
+        self.overlay("Jumped Backward")
+
+        self.player.set_time((elapsed - self.jump_increment) * 1000)
 
     def subtitle(self, track):
         self.player.video_set_spu(int(track))
