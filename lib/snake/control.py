@@ -287,12 +287,18 @@ class Control(QtGui.QWidget):
         threshold = config.getint("snake", "resume_threshold")
         elapsed, total = self._get_time()
 
-        if elapsed < threshold:
+        try:
+            percentage = int((elapsed / float(total)) * 100)
+
+        except ZeroDivisionError:
+            percentage = 0
+
+        if percentage < threshold:
             self._call_api(["viewed", self.media_id, "delete"])
 
             return
 
-        if (total - elapsed) < threshold:
+        if (100 - percentage) < threshold:
             elapsed = 0
 
         self._call_api(["elapsed", self.media_id, elapsed])
