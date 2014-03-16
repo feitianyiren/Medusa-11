@@ -10,7 +10,7 @@
         <div class="contentsText textSubTitle"></div>
     </div>
 
-    {% if advanced %}
+    {% if alternative == "advanced" %}
 
     <div class="mainContentsBox advancedContent">
         <div class="contentsButtonBoxHalf">
@@ -20,6 +20,38 @@
         </div><div class="contentsButtonBoxHalf">
             <div class="contentsButton buttonAudio">
                 Audio Track
+            </div>
+        </div>
+    </div>
+
+    <div class="mainContentsBox contentsLink">
+        <a class="contentsText basicOptions" href="#">
+            Basic Options
+        </a>
+    </div>
+
+    {% elif alternative == "navigation" %}
+
+    <div class="mainContentsBox">
+        <div class="contentsButtonBox">
+            <div class="contentsButton" data-action="navigate" data-value="0">
+                Enter
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton" data-action="navigate" data-value="1">
+                Up
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton" data-action="navigate" data-value="2">
+                Down
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton" data-action="navigate" data-value="3">
+                Left
+            </div>
+        </div><div class="contentsButtonBoxHalf">
+            <div class="contentsButton" data-action="navigate" data-value="4">
+                Right
             </div>
         </div>
     </div>
@@ -63,6 +95,12 @@
                 Mute
             </div>
         </div>
+    </div>
+
+    <div class="mainContentsBox contentsLink navigationOptionsBox">
+        <a class="contentsText navigationOptions" href="#">
+            Navigation Options
+        </a>
     </div>
 
     <div class="mainContentsBox contentsLink">

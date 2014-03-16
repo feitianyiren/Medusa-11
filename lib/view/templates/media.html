@@ -13,6 +13,8 @@
         {% set right_link = "/medusa/browse/television/" ~ item["name_one"] ~ "/" ~ item["name_two"] %}
     {% elif category == "new" %}
         {% set title = item["name"] %}
+    {% elif category == "disc" %}
+        {% set title = "Disc" %}
     {% else %}
         {% set title = item["name_one"] %}
         {% set sub_title = item["name_two"]|join(", ") %}

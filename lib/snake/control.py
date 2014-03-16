@@ -4,6 +4,7 @@
 Handle actions from the Head with regards to VLC media playback.
 """
 
+import glob
 import os
 
 from PyQt4 import QtCore
@@ -30,6 +31,7 @@ class Control(QtGui.QWidget):
         self.downloads_path = ""
         self.communicate = None
         self.media_id = None
+        self.media_name = ""
 
         self.jump_increment = config.getint("snake", "jump_increment")
         self.volume_increment = config.getint("snake", "volume_increment")
@@ -78,7 +80,7 @@ class Control(QtGui.QWidget):
             return
 
         self.media_id = item[0]
-        name = item[1]
+        self.media_name = item[1]
         elapsed = item[2]
         path = item[3]
 
@@ -90,7 +92,7 @@ class Control(QtGui.QWidget):
         if elapsed:
             self.jump(elapsed)
 
-        self.overlay(name)
+        self.overlay(self.media_name)
 
     def pause(self):
         if self._get_state() == "playing":
@@ -105,6 +107,7 @@ class Control(QtGui.QWidget):
         self._update_elapsed()
         self.player.stop()
         self.media_id = None
+        self.media_name = ""
         self._stop.emit()
         self._send_update()
         self.play()
@@ -169,6 +172,9 @@ class Control(QtGui.QWidget):
         else:
             self.overlay("Changed Audio Track")
 
+    def navigate(self, mode):
+        self.player.navigate(int(mode))
+
     #--------------------------------------------------------------------------
 
     def state(self):
@@ -201,6 +207,12 @@ class Control(QtGui.QWidget):
                 path = self._build_media_path(path)
 
                 self._queue.append((media_id, name, elapsed, path))
+
+        elif item == "disc":
+            path, name = self._build_disc_path()
+
+            if path:
+                self._queue.append((item, name, 0, path))
 
         else:
             path = self._build_downloads_path(item)
@@ -253,6 +265,7 @@ class Control(QtGui.QWidget):
 
         update = {
             "media_id": self.media_id or "",
+            "name": self.media_name,
             "state": self._get_state(),
             "elapsed": elapsed,
             "total": total,
@@ -294,3 +307,28 @@ class Control(QtGui.QWidget):
             for file_ in files:
                 if name == file_:
                     return unicode(os.path.join(root, file_))
+
+    def _build_disc_path(self):
+        path = None
+        name = None
+
+        check = glob.glob("/media/*/VIDEO_TS")
+
+        if check:
+            path = "dvd:///dev/dvd"
+            name = "DVD"
+
+        else:
+            check = glob.glob("/media/*/BDMV")
+
+            if check:
+                path = "bluray:///dev/dvd"
+                name = "Blu-ray"
+
+        try:
+            name = check[0].split("/")[2].replace("_", " ").title()
+
+        except Exception:
+            pass
+
+        return path, name

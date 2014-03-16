@@ -97,22 +97,30 @@ def browse_season(show, season):
                                  season=season,
                                  episodes=episodes)
 
-@pages.route("/media/<int:media_id>")
+@pages.route("/media/<media_id>")
 def media(media_id):
-    database = Database()
+    if media_id == "disc":
+        item = {
+            "category": media_id
+        }
 
-    item = database.select_media(media_id)
+    else:
+        media_id = int(media_id)
 
-    if item["category"].lower() == "television":
-        item["season"] = str(item["name_two"]).zfill(2)
-        item["episode"] = str(item["name_three"]).zfill(2)
-        item["previous"], item["next"] = retrieve.get_nearby_episodes(media_id)
+        database = Database()
 
-    data = database.select_viewed(media_id)
+        item = database.select_media(media_id)
 
-    if data:
-        item["viewed"] = retrieve.get_viewed_date(data["viewed"])
-        item["elapsed"] = data["elapsed"]
+        if item["category"].lower() == "television":
+            item["season"] = str(item["name_two"]).zfill(2)
+            item["episode"] = str(item["name_three"]).zfill(2)
+            item["previous"], item["next"] = retrieve.get_nearby_episodes(media_id)
+
+        data = database.select_viewed(media_id)
+
+        if data:
+            item["viewed"] = retrieve.get_viewed_date(data["viewed"])
+            item["elapsed"] = data["elapsed"]
 
     queue = True if retrieve.get_playing_snakes() else False
 
@@ -136,8 +144,8 @@ def new():
 
 @pages.route("/playing")
 @pages.route("/playing/<snake>")
-@pages.route("/playing/<snake>/<advanced>")
-def playing(snake=None, advanced=None):
+@pages.route("/playing/<snake>/<alternative>")
+def playing(snake=None, alternative=None):
     if not snake:
         if Proxy._snakes:
             return flask.redirect("/medusa/playing/%s" % Proxy._snakes.keys()[0])
@@ -146,7 +154,7 @@ def playing(snake=None, advanced=None):
             return flask.redirect("/medusa")
 
     return flask.render_template("playing.html",
-                                 advanced=advanced)
+                                 alternative=alternative)
 
 @pages.route("/viewed")
 def viewed():
