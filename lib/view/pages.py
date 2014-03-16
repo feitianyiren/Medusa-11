@@ -33,6 +33,7 @@ def browse():
     continue_ = retrieve.get_continue_media()
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  categories=categories,
                                  continue_=continue_)
 
@@ -41,6 +42,7 @@ def browse_film():
     items = Database().select_category("film")
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  category="film",
                                  items=items)
 
@@ -58,6 +60,7 @@ def browse_television():
             items[key] = value
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  category="television",
                                  items=items)
 
@@ -75,6 +78,7 @@ def browse_show(show):
     continue_ = retrieve.get_continue_media_by_show(show)
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  show=show,
                                  seasons=seasons,
                                  continue_=continue_)
@@ -93,6 +97,7 @@ def browse_season(show, season):
     episodes = sorted(episodes, key=lambda k: int(k["name_three"]))
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  show=show,
                                  season=season,
                                  episodes=episodes)
@@ -124,7 +129,10 @@ def media(media_id):
 
     queue = True if retrieve.get_playing_snakes() else False
 
-    return flask.render_template("media.html", item=item, queue=queue)
+    return flask.render_template("media.html",
+                                 page="media",
+                                 item=item,
+                                 queue=queue)
 
 @pages.route("/media/new/<name>")
 def media_new(name):
@@ -132,13 +140,16 @@ def media_new(name):
     item["category"] = "new"
     item["name"] = name
 
-    return flask.render_template("media.html", item=item)
+    return flask.render_template("media.html",
+                                 page="media",
+                                 item=item)
 
 @pages.route("/new")
 def new():
     items = retrieve.get_new_items()
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  category="new",
                                  items=items)
 
@@ -154,6 +165,7 @@ def playing(snake=None, alternative=None):
             return flask.redirect("/medusa")
 
     return flask.render_template("playing.html",
+                                 page="playing",
                                  alternative=alternative)
 
 @pages.route("/viewed")
@@ -161,6 +173,7 @@ def viewed():
     items = retrieve.get_viewed_items()
 
     return flask.render_template("browse.html",
+                                 page="browse",
                                  category="viewed",
                                  items=items)
 
@@ -168,4 +181,5 @@ def viewed():
 @pages.route("/admin/<snake>")
 def admin(snake=None):
     return flask.render_template("admin.html",
+                                 page="admin",
                                  snake=snake)

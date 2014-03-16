@@ -15,14 +15,13 @@
         <link rel="apple-touch-startup-image" media="(max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2)" href="{{ url_for('static', filename='img/medusa-splash.png') }}">
         <link rel="apple-touch-startup-image" media="(min-device-width: 768px) and (orientation: portrait)" href="{{ url_for('static', filename='img/medusa-splash-big.png') }}">
         <link rel="apple-touch-startup-image" media="(min-device-width: 768px) and (orientation: landscape)" href="{{ url_for('static', filename='img/medusa-splash-landscape.png') }}">
-
-        <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/medusa.js') }}"></script>
     </head>
     <body>
         {% include "navigation.html" %}
         {% block content %}{% endblock %}
 
-        <script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
+        <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/medusa.js') }}"></script>
+        <script src="{{ url_for('static', filename='js') }}/medusa-{{ page }}.js"></script>
     </body>
 </html>
