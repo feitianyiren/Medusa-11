@@ -133,6 +133,7 @@ a {
     border-color: #ccc;
     border-style: solid;
     border-width: 1px;
+    box-shadow: none;
     display: block;
     font-size: 56px;
     font-weight: bold;
@@ -140,11 +141,22 @@ a {
     padding-bottom: 32px;
     padding-top: 32px;
     text-align: center;
+    transition: box-shadow 750ms;
 }
 .contentsButton:hover, .contentsLink:hover {
     background-color: #ccc;
     border-color: #bbb;
+    box-shadow: inset 0 0 10px #bbb;
     cursor: pointer;
+    transition: box-shadow 500ms;
+}
+.buttonClicked, .buttonClicked:hover {
+    box-shadow: inset 0 0 30px #555;
+    transition: box-shadow 500ms;
+}
+.buttonClickedFinish {
+    box-shadow: none;
+    transition: box-shadow 750ms;
 }
 .progressBar {
     background-color: #ccc;
