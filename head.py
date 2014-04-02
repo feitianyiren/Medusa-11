@@ -20,22 +20,24 @@ from lib.view.pages import pages
 #------------------------------------------------------------------------------
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib/view")
+API_BASE = config.get("head", "api_base")
+URL_BASE = config.get("head", "url_base")
 
 #------------------------------------------------------------------------------
 
 app = flask.Flask(__name__,
                   template_folder="%s/templates" % PATH,
                   static_folder="%s/static" % PATH,
-                  static_url_path="/medusa/static")
+                  static_url_path="%s/static" % URL_BASE)
 
-app.register_blueprint(api, url_prefix="/medusa/api")
-app.register_blueprint(pages, url_prefix="/medusa")
+app.register_blueprint(api, url_prefix="/%s" % API_BASE)
+app.register_blueprint(pages, url_prefix=URL_BASE)
 
 #------------------------------------------------------------------------------
 
 @app.route("/")
 def root():
-    return flask.redirect("/medusa")
+    return flask.redirect(URL_BASE)
 
 #------------------------------------------------------------------------------
 

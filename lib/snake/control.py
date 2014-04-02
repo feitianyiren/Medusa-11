@@ -6,6 +6,7 @@ Handle actions from the Head with regards to VLC media playback.
 
 import glob
 import os
+import time
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -84,9 +85,11 @@ class Control(QtGui.QWidget):
         elapsed = item[2]
         path = item[3]
 
+        log.warn("About to play: %s", path)
+
         self._insert_viewed(self.media_id)
         self.player.set_media(self.instance.media_new(path))
-        self.player.play()
+        self.start()
         self._play.emit()
 
         if elapsed:
@@ -177,6 +180,19 @@ class Control(QtGui.QWidget):
 
     #--------------------------------------------------------------------------
 
+    def start(self):
+        attempts = 0
+
+        while attempts < 2:
+            self.player.play()
+
+            time.sleep(1)
+
+            if self._get_state() == "playing":
+                break
+
+            attempts += 1
+
     def state(self):
         self._send_update()
 
@@ -218,6 +234,8 @@ class Control(QtGui.QWidget):
             path = self._build_downloads_path(item)
 
             self._queue.append((item, item, 0, path))
+
+    #--------------------------------------------------------------------------
 
     def _get_state(self):
         return str(self.player.get_state()).lstrip("State.").lower()

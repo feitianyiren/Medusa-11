@@ -11,6 +11,12 @@
         {% set sub_title_link = "/medusa/browse/television/" ~ item["name_one"] %}
         {% set right = "S" ~ item["season"] ~ "E" ~ item["episode"] %}
         {% set right_link = "/medusa/browse/television/" ~ item["name_one"] ~ "/" ~ item["name_two"] %}
+    {% elif category == "music" %}
+        {% set title = item["name_three"] %}
+        {% set sub_title = item["name_one"] %}
+        {% set sub_title_link = "/medusa/browse/music/" ~ item["name_one"] %}
+        {% set right = item["name_two"] %}
+        {% set right_link = "/medusa/browse/music/" ~ item["name_one"] ~ "/" ~ item["name_two"] %}
     {% elif category == "new" %}
         {% set title = item["name"] %}
     {% elif category == "disc" %}

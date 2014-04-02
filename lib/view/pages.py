@@ -102,6 +102,60 @@ def browse_season(show, season):
                                  season=season,
                                  episodes=episodes)
 
+@pages.route("/browse/music")
+def browse_music():
+    items = OrderedDict()
+    artists = set()
+    data = Database().select_category("music")
+
+    for value in data.values():
+        artists.add(value["name_one"])
+
+    for artist in sorted(artists):
+        items[artist] = {
+            "name_one": artist
+        }
+
+    return flask.render_template("browse.html",
+                                 page="browse",
+                                 category="music",
+                                 items=items)
+
+@pages.route("/browse/music/<artist>")
+def browse_artist(artist):
+    albums = set()
+    data = Database().select_category("music")
+
+    for key, value in data.items():
+        if value["name_one"] == artist:
+            albums.add(value["name_two"])
+
+    albums = sorted(albums)
+
+    return flask.render_template("browse.html",
+                                 page="browse",
+                                 artist=artist,
+                                 albums=albums)
+
+@pages.route("/browse/music/<artist>/<album>")
+def browse_album(artist, album):
+    tracks = []
+    data = Database().select_category("music")
+
+    for key, value in data.items():
+        if value["name_one"] == artist and value["name_two"] == album:
+            info = value
+            info["id"] = key
+            tracks.append(info)
+
+    tracks = sorted(tracks, key=lambda k: k["name_three"])
+
+    return flask.render_template("browse.html",
+                                 page="browse",
+                                 artist=artist,
+                                 album=album,
+                                 tracks=tracks)
+
 @pages.route("/media/<media_id>")
 def media(media_id):
     if media_id == "disc":

@@ -9,6 +9,8 @@
         {% set item = items[key] %}
         {% if category == "television" %}
             {% set link = "/medusa/browse/television/" ~ item["name_one"] %}
+        {% elif category == "music" %}
+            {% set link = "/medusa/browse/music/" ~ item["name_one"] %}
         {% elif category == "new" %}
             {% if item["id"] %}
                 {% set link = "/medusa/media/" ~ item["id"] %}
@@ -77,6 +79,44 @@
        href="/medusa/media/{{ episode['id'] }}">
         <div class="contentsText contentsName">
         {{ episode["name_three"] }}. {{ episode["name_four"] }}
+        </div>
+    </a>
+    {% endfor %}
+
+{% elif albums %}
+
+    <div class="mainContentsBox">
+        <div class="contentsText contentsTitle">
+            {{ artist }}
+        </div>
+    </div>
+
+    {% for album in albums %}
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/browse/music/{{ artist }}/{{ album }}">
+        <div class="contentsText contentsName">
+            {{ album }}
+        </div>
+    </a>
+    {% endfor %}
+
+{% elif album %}
+
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/browse/music/{{ artist }}">
+        <div class="contentsText contentsTitle">
+            {{ album }}
+        </div>
+        <div class="contentsYear floatRight">
+            {{ artist }}
+        </div>
+    </a>
+
+    {% for track in tracks %}
+    <a class="mainContentsBox contentsLink"
+       href="/medusa/media/{{ track['id'] }}">
+        <div class="contentsText contentsName">
+        {{ track["name_three"] }}
         </div>
     </a>
     {% endfor %}

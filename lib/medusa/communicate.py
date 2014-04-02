@@ -89,6 +89,7 @@ class Communicate(object):
         else:
             return self.thread._send_server(args[0], args[1])
 
+#------------------------------------------------------------------------------
 
 class CommunicationThread(threading.Thread):
     """
@@ -129,6 +130,7 @@ class CommunicationQThread(QtCore.QThread):
         self._send_client = self.handler._send_client
         self._send_server = self.handler._send_server
 
+#------------------------------------------------------------------------------
 
 class CommunicationHandler(object):
     """
@@ -303,6 +305,7 @@ class CommunicationClient(asyncore.dispatcher):
         time.sleep(5)
         log.warn("Attempting to reconnect to server")
         self._connect()
+
 
 class CommunicationServer(asyncore.dispatcher):
     """

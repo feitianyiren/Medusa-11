@@ -10,7 +10,7 @@ import os
 
 from lib.head.database import Database
 from lib.head.proxy import Proxy
-from lib.medusa import utilities
+from lib.medusa import categories
 from lib.medusa.config import config
 
 #------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ def get_new_items():
 
     for item in Database().select_new():
         files.append((item["modified"],
-                      utilities.format_media_name(item),
+                      categories.format_media_name(item),
                       item["id"]))
 
     for i in enumerate(sorted(files, reverse=True)):
@@ -48,17 +48,21 @@ def get_viewed_items():
 
     for i in enumerate(Database().select_viewed()):
         media_id = i[1]["id"]
+        name = None
 
         if media_id.isdigit():
             data = Database().select_media(int(media_id))
-            name = utilities.format_media_name(data)
+
+            if data:
+                name = categories.format_media_name(data)
 
         else:
             name = media_id
 
-        items[media_id] = {
-            "name_one": name
-        }
+        if name:
+            items[media_id] = {
+                "name_one": name
+            }
 
     return items
 
@@ -105,6 +109,9 @@ def get_continue_media():
 
         except Exception:
             continue
+
+        if not info:
+            return
 
         info["id"] = media_id
         info["elapsed"] = int(item.get("elapsed") or 0)

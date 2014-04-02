@@ -70,8 +70,10 @@ class Interface(QtGui.QMainWindow):
             self.control.stop()
 
     def play(self):
-        self.show()
-        self.showFullScreen()
+        if self.control.player.video_get_track_count() > 0:
+            self.show()
+            self.showFullScreen()
+
         self.timer.start()
 
     def stop(self):
