@@ -5,13 +5,14 @@ Scan for new media items in the configured locations, parse filenames using
 the user-defined patterns and index matches into the database.
 """
 
+import json
 import os
 import re
-import simplejson as json
 import threading
 import time
 
 from lib.head.database import Database
+from lib.medusa import categories
 from lib.medusa import utilities
 from lib.medusa.config import config
 from lib.medusa.log import log
@@ -26,7 +27,9 @@ EXPRESSIONS = {
     "part": "\d*",
     "show": "(.*)",
     "season": "(\d{2})",
-    "episode": "(\d{2})"
+    "episode": "(\d{2})",
+    "artist": "(.*)",
+    "album": "(.*)"
 }
 ESCAPES = [" ", "-", "(", ")"]
 
@@ -41,10 +44,13 @@ class Index(object):
         self.thread.start()
 
     def index(self):
-        self.thread.index()
+        self.thread.now = True
 
     def stop(self):
         self.thread.stop = True
+
+    def restart(self):
+        self.thread.stop = False
 
 #------------------------------------------------------------------------------
 
@@ -55,17 +61,32 @@ class IndexThread(threading.Thread):
 
         self.database = Database()
         self.naming = self._get_naming()
+        self.now = False
         self.stop = False
 
     def run(self):
-        while True:
-            if not self.stop:
-                self.index()
+        i = 0
 
-            time.sleep(config.getint("index", "interval"))
+        while True:
+            i += 1
+
+            if not self.stop:
+                if self.now:
+                    self.now = False
+
+                    self.index()
+
+                if i == config.getint("index", "interval"):
+                    i = 0
+
+                    self.index()
+
+            time.sleep(1)
 
     def index(self):
         log.warn("About to index media")
+
+        self.stop = True
 
         media = []
 
@@ -82,6 +103,11 @@ class IndexThread(threading.Thread):
         self.insert_new_media(media)
         self.delete_missing_media()
 
+        self.now = False
+        self.stop = False
+
+        log.warn("Finished indexing media")
+
     #--------------------------------------------------------------------------
 
     def find_media(self, category, path, expressions):
@@ -91,7 +117,11 @@ class IndexThread(threading.Thread):
         if category in config.getlist("index", "deep"):
             deep = True
 
-        video_formats = config.getlist("index", "video_formats")
+        if category in config.getlist("index", "audio_categories"):
+            allowed_formats = config.getlist("index", "audio_formats")
+
+        else:
+            allowed_formats = config.getlist("index", "video_formats")
 
         for root, directories, files in os.walk(unicode(path)):
             data = {}
@@ -113,7 +143,7 @@ class IndexThread(threading.Thread):
 
                 extension = os.path.splitext(os.path.basename(f))[-1].replace(".", "", 1)
 
-                if extension not in video_formats:
+                if extension not in allowed_formats:
                     continue
 
                 if not deep and data.get("extension"):
@@ -130,7 +160,13 @@ class IndexThread(threading.Thread):
                     if matches:
                         break
 
-                result = getattr(self, "parse_%s" % category.lower())(matches)
+                if not matches:
+                    log.error("Failed to expression match %s", match_path)
+                    
+                    continue
+
+                result = getattr(categories,
+                                 "parse_%s" % category.lower())(matches)
 
                 data.update(result)
                 sub_data.update(result)
@@ -177,42 +213,6 @@ class IndexThread(threading.Thread):
                     to_delete.add(int(item["id"]))
 
         self.database.delete_media(to_delete)
-
-    #--------------------------------------------------------------------------
-
-    def parse_film(self, matches):
-        data = {}
-        title, year, directors_ = matches.groups()
-        directors = []
-
-        for director in directors_.split(", "):
-            directors.append(director)
-
-        data["name_one"] = title
-        data["name_two"] = directors
-        data["name_three"] = ""
-        data["name_four"] = ""
-        data["year"] = int(year)
-
-        return data
-
-    def parse_television(self, matches):
-        data = {}
-
-        if len(matches.groups()) == 5:
-            show, year, season, show, episode = matches.groups()
-            title = ""
-
-        else:
-            show, year, season, show, episode, title = matches.groups()
-
-        data["name_one"] = show
-        data["name_two"] = int(season)
-        data["name_three"] = int(episode)
-        data["name_four"] = title
-        data["year"] = int(year)
-
-        return data
 
     #--------------------------------------------------------------------------
 
