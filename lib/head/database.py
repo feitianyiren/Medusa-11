@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Query and modify the SQLite database of media items.
+Query and modify the SQLite database of media items and viewing history.
 
 Select results will be cached until the cache is expired due to an insert.
 """
@@ -73,7 +73,7 @@ class Database(object):
 
         log.info("Returning media select from database")
 
-        return data[media_id]
+        return data.get(media_id)
 
     def select_all_media(self):
         log.info("Perfoming all media select")
@@ -115,11 +115,35 @@ class Database(object):
         return data
 
     def select_latest_viewed_by_show(self, show):
+        log.info("Perfoming latest viewed select for show: %s", show)
+
         with self.database:
             data = self.database.select_latest_viewed_by_show(show)
 
         if data:
             return data["id"]
+
+    def select_next_tracks(self, media_id):
+        log.info("Perfoming select next tracks for media: %s", media_id)
+
+        try:
+            media_id = int(media_id)
+
+            with self.database:
+                data = self.database.select_media_by_id(media_id)[media_id]
+
+        except Exception as excp:
+            log.error("Select next tracks failed: %s", excp)
+
+            return []
+
+        artist = data["name_one"]
+        album = data["name_two"]
+
+        with self.database:
+            data = self.database.select_tracks(artist, album)
+
+        return data
 
     #--------------------------------------------------------------------------
 
@@ -204,6 +228,9 @@ class DatabaseConnection(object):
         self.database = os.path.join(config.base_path,
                                      config.get("files", "database"))
 
+        if not os.path.exists(self.database):
+            self.create_database()
+
     def __enter__(self):
         self._open_connection()
 
@@ -257,6 +284,38 @@ class DatabaseConnection(object):
             result[column[0]] = value
 
         return result
+
+    #--------------------------------------------------------------------------
+
+    def create_database(self):
+        log.warn("Creating database")
+
+        self._open_connection()
+
+        self.cursor.execute("""CREATE TABLE
+                               media
+                               (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                category TEXT,
+                                paths TEXT,
+                                name_one TEXT,
+                                name_two TEXT,
+                                name_three TEXT,
+                                name_four TEXT,
+                                year INTEGER,
+                                extension TEXT,
+                                modified INTEGER)
+                            """)
+
+        self.cursor.execute("""CREATE TABLE
+                               viewed
+                               (id TEXT,
+                                viewed INTEGER,
+                                elapsed INTEGER)
+                            """)
+
+        self._close_connection()
+
+        log.warn("Created database")
 
     #--------------------------------------------------------------------------
 
@@ -356,7 +415,7 @@ class DatabaseConnection(object):
                             elapsed
                             FROM viewed
                             ORDER BY viewed DESC
-                            LIMIT 30
+                            LIMIT 100
                             """)
 
         return self.cursor.fetchall()
@@ -382,6 +441,17 @@ class DatabaseConnection(object):
                             """, (show,))
 
         return self.cursor.fetchone()
+
+    def select_tracks(self, artist, album):
+        self.cursor.execute("""
+                            SELECT *
+                            FROM media
+                            WHERE name_one = ?
+                            AND name_two = ?
+                            ORDER BY name_three ASC
+                            """, (artist, album))
+
+        return self.cursor.fetchall()
 
     #--------------------------------------------------------------------------
 
