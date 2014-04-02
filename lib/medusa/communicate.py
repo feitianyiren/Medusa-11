@@ -65,6 +65,7 @@ class Communicate(object):
                            self.host,
                            self.port,
                            self.name)
+
         self.thread.start()
 
     #--------------------------------------------------------------------------

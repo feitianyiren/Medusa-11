@@ -15,8 +15,13 @@ class Proxy(object):
     control = None
 
     def action(self, message):
+        """
+        Try to perform the received playback action on the Control object.
+        """
+
         try:
             function, arguments = message
+
             getattr(self.control, function)(*arguments)
 
             log.warn("Performed action: %s", function)

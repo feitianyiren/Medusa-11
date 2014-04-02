@@ -68,7 +68,7 @@ class IndexThread(threading.Thread):
         i = 0
 
         while True:
-            i += 1
+            i += 5
 
             if not self.stop:
                 if self.now:
@@ -76,12 +76,12 @@ class IndexThread(threading.Thread):
 
                     self.index()
 
-                if i == config.getint("index", "interval"):
+                if i >= config.getint("index", "interval"):
                     i = 0
 
                     self.index()
 
-            time.sleep(1)
+            time.sleep(5)
 
     def index(self):
         log.warn("About to index media")

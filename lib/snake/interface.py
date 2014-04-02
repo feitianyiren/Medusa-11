@@ -17,13 +17,18 @@ class Interface(QtGui.QMainWindow):
 
     def __init__(self, control):
         super(Interface, self).__init__()
+
         self.control = control
         self.player = self.control.player
+
+    #--------------------------------------------------------------------------
 
     def initialise(self):
         self.build_interface()
         self.connect_player()
         self.connect_slots()
+
+    #--------------------------------------------------------------------------
 
     def build_interface(self):
         self.window = QtGui.QWidget(self)
@@ -65,11 +70,19 @@ class Interface(QtGui.QMainWindow):
         self.control._play.connect(self.play)
         self.control._stop.connect(self.stop)
 
+    #--------------------------------------------------------------------------
+
     def check_status(self):
+        """
+        Check that VLC is still playing. If it isn't, trigger a stop.
+        """
+
         if self.control.state() not in ("playing", "paused"):
             self.control.stop()
 
     def play(self):
+        # Only show the window if there is a video track.
+        #
         if self.control.player.video_get_track_count() > 0:
             self.show()
             self.showFullScreen()

@@ -80,7 +80,7 @@ def update_viewed(media_id, elapsed=None, delete=False):
         except Exception:
             info = {}
 
-        if info.get("category") in config.getlist("head", "no_history"):
+        if info.get("category") in config.getlist("viewed", "no_history"):
             return "0"
 
         if elapsed:

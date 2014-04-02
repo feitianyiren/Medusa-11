@@ -42,6 +42,10 @@ class Control(QtGui.QWidget):
         self.setup()
 
     def setup(self):
+        """
+        Prepare the GUI and VLC instance for playback.
+        """
+
         arguments = [
             "--video-title-show",
             "--video-title-timeout", "1",
@@ -68,6 +72,11 @@ class Control(QtGui.QWidget):
     #--------------------------------------------------------------------------
 
     def play(self, item=None):
+        """
+        Play the next media item in the queue. If a new item is passed, add
+        it to the queue and then play it.
+        """
+
         if self.media_id:
             self.stop()
 
@@ -109,10 +118,14 @@ class Control(QtGui.QWidget):
     def stop(self):
         self._update_elapsed()
         self.player.stop()
+
         self.media_id = None
         self.media_name = ""
+
         self._stop.emit()
         self._send_update()
+
+        # Play the next item in the queue, if there is one.
         self.play()
 
     def volume_up(self):
@@ -181,6 +194,11 @@ class Control(QtGui.QWidget):
     #--------------------------------------------------------------------------
 
     def start(self):
+        """
+        Begin media playback. Attempt this multiple times if necessary, as
+        VLC will often fail on transient errors the first or second time.
+        """
+
         attempts = 0
 
         while attempts < 2:
@@ -199,6 +217,10 @@ class Control(QtGui.QWidget):
         return self._get_state()
 
     def overlay(self, text):
+        """
+        Set a temporary text overlay on the video.
+        """
+
         self.player.video_set_marquee_string(vlc.VideoMarqueeOption.Text, text)
 
     def queue(self, item):
@@ -212,6 +234,11 @@ class Control(QtGui.QWidget):
     #--------------------------------------------------------------------------
 
     def _add_to_queue(self, item):
+        """
+        Find the path to the file(s) for a given media item and add it/them
+        to the queue along with useful metadata.
+        """
+
         if str(item).isdigit():
             media_id = int(item)
             data = self._call_api(["media", media_id])
@@ -265,6 +292,10 @@ class Control(QtGui.QWidget):
     #--------------------------------------------------------------------------
 
     def _call_api(self, bits):
+        """
+        Make a request to the Head's API.
+        """
+
         url = "http://%s:%s/%s/%s" % (config.get("head", "host"),
                                       config.get("ports", "head"),
                                       config.get("head", "api_base"),
@@ -333,6 +364,10 @@ class Control(QtGui.QWidget):
                     return unicode(os.path.join(root, file_))
 
     def _build_disc_path(self):
+        """
+        Find the path to an inserted disc, if any.
+        """
+
         path = None
         name = None
 
