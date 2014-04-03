@@ -137,6 +137,9 @@ class Database(object):
 
             return []
 
+        if data["category"] != "Music":
+            return []
+
         artist = data["name_one"]
         album = data["name_two"]
 
