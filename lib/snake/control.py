@@ -56,6 +56,8 @@ class Control(QtGui.QWidget):
         self.instance = vlc.Instance(" ".join(arguments))
         self.player = self.instance.media_player_new()
 
+        self.player.video_set_deinterlace("blend")
+
         overlay_time = config.getint("snake", "overlay_time") * 1000
 
         settings = {
@@ -102,7 +104,7 @@ class Control(QtGui.QWidget):
         self._play.emit()
 
         if elapsed:
-            self.jump(elapsed)
+            self.jump_to(elapsed)
 
         self.overlay(self.media_name)
 
@@ -279,7 +281,7 @@ class Control(QtGui.QWidget):
     #--------------------------------------------------------------------------
 
     def _set_volume(self, volume):
-        log.info("Setting volume to %s", volume)
+        log.warn("Setting volume to %s", volume)
 
         if volume > self.volume_max:
             volume = self.volume_max
@@ -372,20 +374,30 @@ class Control(QtGui.QWidget):
         name = None
 
         check = glob.glob("/media/*/VIDEO_TS")
+        name_level = 2
+
+        if not check:
+            check = glob.glob("/media/*/*/VIDEO_TS")
+            name_level = 3
 
         if check:
-            path = "dvd:///dev/dvd"
+            path = "dvd:///dev/sr0"
             name = "DVD"
 
         else:
             check = glob.glob("/media/*/BDMV")
+            name_level = 2
+
+            if not check:
+                check = glob.glob("/media/*/*/BDMV")
+                name_level = 3
 
             if check:
-                path = "bluray:///dev/dvd"
+                path = "bluray:///dev/sr0"
                 name = "Blu-ray"
 
         try:
-            name = check[0].split("/")[2].replace("_", " ").title()
+            name = check[0].split("/")[name_level].replace("_", " ").title()
 
         except Exception:
             pass
