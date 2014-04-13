@@ -81,12 +81,12 @@
     <div class="mainContentsBox">
         {% if item["previous"] and item["next"] %}
         <div class="contentsButtonBoxHalf">
-            <a class="contentsButton"
+            <a class="contentsButton previousButton"
                href='/medusa/media/{{ item["previous"] }}'>
                 Previous
             </a>
         </div><div class="contentsButtonBoxHalf">
-            <a class="contentsButton"
+            <a class="contentsButton nextButton"
                href='/medusa/media/{{ item["next"] }}'>
                 Next
             </a>
@@ -94,7 +94,7 @@
         {% else %}
         {% if item["previous"] %}
         <div class="contentsButtonBox">
-            <a class="contentsButton"
+            <a class="contentsButton previousButton"
                href='/medusa/media/{{ item["previous"] }}'>
                 Previous
             </a>
@@ -102,7 +102,7 @@
         {% endif %}
         {% if item["next"] %}
         <div class="contentsButtonBox">
-            <a class="contentsButton"
+            <a class="contentsButton nextButton"
                href='/medusa/media/{{ item["next"] }}'>
                 Next
             </a>
