@@ -44,6 +44,10 @@ class Index(object):
         self.thread.start()
 
     def index(self):
+        """
+        Trigger an index to start as soon as possible.
+        """
+
         self.thread.now = True
 
     def stop(self):
@@ -65,6 +69,10 @@ class IndexThread(threading.Thread):
         self.stop = False
 
     def run(self):
+        """
+        Check every 5 seconds if it is time to index.
+        """
+
         i = 0
 
         while True:
@@ -199,7 +207,7 @@ class IndexThread(threading.Thread):
         return media
 
     def insert_new_media(self, media):
-       self.database.insert_media(media)
+        self.database.insert_media(media)
 
     def delete_missing_media(self):
         to_delete = set()

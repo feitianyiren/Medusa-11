@@ -28,22 +28,24 @@ URL_BASE = config.get("head", "url_base")
 app = flask.Flask(__name__,
                   template_folder="%s/templates" % PATH,
                   static_folder="%s/static" % PATH,
-                  static_url_path="%s/static" % URL_BASE)
+                  static_url_path="/%s/static" % URL_BASE)
 
-app.register_blueprint(api, url_prefix="/%s" % API_BASE)
-app.register_blueprint(pages, url_prefix=URL_BASE)
+app.register_blueprint(api, url_prefix="/%s/%s" % (URL_BASE, API_BASE))
+app.register_blueprint(pages, url_prefix="/%s" % URL_BASE)
 
 #------------------------------------------------------------------------------
 
 @app.route("/")
 def root():
-    return flask.redirect(URL_BASE)
+    return flask.redirect("/%s" % URL_BASE)
 
 #------------------------------------------------------------------------------
 
 def main():
     Index()
+
     Communicate(proxy=Proxy)
+
     app.run(host="0.0.0.0", port=config.getint("ports", "head"))
 
 #------------------------------------------------------------------------------

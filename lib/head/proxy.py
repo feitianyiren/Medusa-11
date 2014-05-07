@@ -14,4 +14,5 @@ class Proxy(object):
 
     def update(self, message):
         snake, status = message
+
         self._snakes[snake] = status

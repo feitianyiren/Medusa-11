@@ -49,14 +49,14 @@ def send(snake, action, value=None):
 
     return result
 
-@api.route("/viewed/<media_id>")
-@api.route("/viewed/<media_id>/<delete>")
+@api.route("/viewed/<media_id>", methods=["GET"])
+@api.route("/viewed/<media_id>/<delete>", methods=["GET"])
 def viewed(media_id, delete=None):
     result = support.update_viewed(media_id, delete=delete)
 
     return result
 
-@api.route("/elapsed/<media_id>/<int:elapsed>")
+@api.route("/elapsed/<media_id>/<int:elapsed>", methods=["GET"])
 def elapsed(media_id, elapsed):
     result = support.update_viewed(media_id, elapsed=elapsed)
 

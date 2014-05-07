@@ -217,10 +217,12 @@ class Database(object):
 
         elif category:
             log.warn("Clearing cache for category: %s", category)
+
             del cls._cache[category]
 
         else:
             log.warn("Clearing cache for all categories")
+
             cls._cache = {}
 
 #------------------------------------------------------------------------------
@@ -323,9 +325,8 @@ class DatabaseConnection(object):
     #--------------------------------------------------------------------------
 
     def select_media(self):
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
+        self.cursor.execute("""SELECT *
+                               FROM media
                             """)
 
         return self.cursor.fetchall()
@@ -333,11 +334,10 @@ class DatabaseConnection(object):
     def select_media_by_id(self, media_id):
         result = {}
 
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            LEFT JOIN viewed USING (id)
-                            WHERE id = ?
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               LEFT JOIN viewed USING (id)
+                               WHERE id = ?
                             """, (media_id,))
 
         rows = self.cursor.fetchall()
@@ -352,14 +352,13 @@ class DatabaseConnection(object):
     def select_media_by_category(self, category):
         results = OrderedDict()
 
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            WHERE category = ?
-                            ORDER BY name_one ASC,
-                            cast(name_two as unsigned) ASC,
-                            cast(name_three as unsigned) ASC,
-                            name_four ASC
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               WHERE category = ?
+                               ORDER BY name_one ASC,
+                               cast(name_two as unsigned) ASC,
+                               cast(name_three as unsigned) ASC,
+                               name_four ASC
                             """, (category.title(),))
 
         rows = self.cursor.fetchall()
@@ -373,15 +372,14 @@ class DatabaseConnection(object):
     def select_media_like_term(self, term):
         like_term = "%%%s%%" % term
 
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            WHERE (name_one LIKE ?)
-                            OR (name_two LIKE ?)
-                            OR (name_three LIKE ?)
-                            OR (name_four LIKE ?)
-                            OR (year = ?)
-                            ORDER BY year DESC
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               WHERE (name_one LIKE ?)
+                               OR (name_two LIKE ?)
+                               OR (name_three LIKE ?)
+                               OR (name_four LIKE ?)
+                               OR (year = ?)
+                               ORDER BY year DESC
                             """, (like_term,
                                   like_term,
                                   like_term,
@@ -391,67 +389,61 @@ class DatabaseConnection(object):
         return self.cursor.fetchall()
 
     def select_media_by_modified(self):
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            ORDER BY modified DESC
-                            LIMIT 10
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               ORDER BY modified DESC
+                               LIMIT 10
                             """)
 
         return self.cursor.fetchall()
 
     def select_media_by_paths(self, data):
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            WHERE category = ?
-                            AND paths = ?
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               WHERE category = ?
+                               AND paths = ?
                             """, (data["category"],
                                   self._sanitise(data["paths"])))
 
         return self.cursor.fetchall()
 
     def select_viewed(self):
-        self.cursor.execute("""
-                            SELECT id,
-                            viewed,
-                            elapsed
-                            FROM viewed
-                            ORDER BY viewed DESC
-                            LIMIT 100
+        self.cursor.execute("""SELECT id,
+                               viewed,
+                               elapsed
+                               FROM viewed
+                               ORDER BY viewed DESC
+                               LIMIT 100
                             """)
 
         return self.cursor.fetchall()
 
     def select_viewed_by_id(self, media_id):
-        self.cursor.execute("""
-                            SELECT viewed,
-                            elapsed
-                            FROM viewed
-                            WHERE id = ?
+        self.cursor.execute("""SELECT viewed,
+                               elapsed
+                               FROM viewed
+                               WHERE id = ?
                             """, (media_id,))
 
         return self.cursor.fetchall()
 
     def select_latest_viewed_by_show(self, show):
-        self.cursor.execute("""
-                            SELECT id
-                            FROM viewed
-                            JOIN media USING (id)
-                            WHERE name_one = ?
-                            ORDER BY viewed DESC
-                            LIMIT 1
+        self.cursor.execute("""SELECT id
+                               FROM viewed
+                               JOIN media USING (id)
+                               WHERE name_one = ?
+                               ORDER BY viewed DESC
+                               LIMIT 1
                             """, (show,))
 
         return self.cursor.fetchone()
 
     def select_tracks(self, artist, album):
-        self.cursor.execute("""
-                            SELECT *
-                            FROM media
-                            WHERE name_one = ?
-                            AND name_two = ?
-                            ORDER BY name_three ASC
+        self.cursor.execute("""SELECT *
+                               FROM media
+                               WHERE name_one = ?
+                               AND name_two = ?
+                               ORDER BY name_three ASC
                             """, (artist, album))
 
         return self.cursor.fetchall()
@@ -473,9 +465,8 @@ class DatabaseConnection(object):
         extension = data["extension"]
         modified = data["modified"]
 
-        self.cursor.execute("""
-                            INSERT INTO media (
-                                category,
+        self.cursor.execute("""INSERT INTO media
+                               (category,
                                 paths,
                                 name_one,
                                 name_two,
@@ -484,7 +475,7 @@ class DatabaseConnection(object):
                                 year,
                                 extension,
                                 modified)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """, (category,
                                   paths,
                                   name_one,
@@ -499,18 +490,16 @@ class DatabaseConnection(object):
         media_id = media_id
         viewed = int(time.time())
 
-        self.cursor.execute("""
-                            INSERT OR IGNORE INTO viewed (
-                                id,
+        self.cursor.execute("""INSERT OR IGNORE INTO viewed
+                               (id,
                                 viewed)
-                            VALUES (?, ?)
+                               VALUES (?, ?)
                             """, (media_id,
                                   viewed))
 
-        self.cursor.execute("""
-                            UPDATE viewed
-                            SET viewed = ?
-                            WHERE id = ?
+        self.cursor.execute("""UPDATE viewed
+                               SET viewed = ?
+                               WHERE id = ?
                             """, (media_id,
                                   viewed))
 
@@ -520,23 +509,20 @@ class DatabaseConnection(object):
         media_id = media_id
         elapsed = int(elapsed)
 
-        self.cursor.execute("""
-                            UPDATE viewed
-                            SET elapsed = ?
-                            WHERE id = ?
+        self.cursor.execute("""UPDATE viewed
+                               SET elapsed = ?
+                               WHERE id = ?
                             """, (elapsed,
                                   media_id))
 
     #--------------------------------------------------------------------------
 
     def delete_viewed(self, media_id):
-        self.cursor.execute("""
-                            DELETE FROM viewed
-                            WHERE id = ?
+        self.cursor.execute("""DELETE FROM viewed
+                               WHERE id = ?
                             """, (media_id,))
 
     def delete_media_by_id(self, media_id):
-        self.cursor.execute("""
-                            DELETE FROM media
-                            WHERE id = ?
+        self.cursor.execute("""DELETE FROM media
+                               WHERE id = ?
                             """, (media_id,))
