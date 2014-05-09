@@ -298,7 +298,7 @@ class Control(QtGui.QWidget):
         Make a request to the Head's API.
         """
 
-        url = "http://%s:%s/%s/%s" % (config.get("head", "host"),
+        url = "http://%s:%s/medusa/%s/%s" % (config.get("head", "host"),
                                       config.get("ports", "head"),
                                       config.get("head", "api_base"),
                                       "/".join(str(b) for b in bits))
