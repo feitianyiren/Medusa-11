@@ -8,6 +8,7 @@ interface, Snakes, and the database.
 import flask
 
 from lib.head import support
+from lib.view import retrieve
 
 #------------------------------------------------------------------------------
 
@@ -18,6 +19,9 @@ api = flask.Blueprint("api", __name__)
 @api.route("/media/<int:media_id>", methods=["GET"])
 def media(media_id):
     data = support.get_media(media_id)
+
+    if data["category"].lower() == "television":
+        data["previous"], data["next"] = retrieve.get_nearby_episodes(media_id)
 
     return flask.jsonify(data)
 

@@ -192,6 +192,13 @@ a {
 .navigationOptionsBox {
     display: none;
 }
+.nextEpisode {
+    color: #555;
+    font-family: "Helvetica Narrow";
+    font-weight: bold;
+    margin-left: 8px;
+    margin-right: -4px;
+}
 
 /* ------------------------------------------------------------------------- */
 
