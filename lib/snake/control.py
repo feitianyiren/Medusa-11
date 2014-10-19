@@ -35,6 +35,7 @@ class Control(QtGui.QWidget):
         self.media_name = ""
 
         self.jump_increment = config.getint("snake", "jump_increment")
+        self.overlay_time = config.getint("snake", "overlay_time") * 1000
         self.volume_increment = config.getint("snake", "volume_increment")
         self.volume_max = config.getint("snake", "volume_max")
         self.volume_min = config.getint("snake", "volume_min")
@@ -46,23 +47,13 @@ class Control(QtGui.QWidget):
         Prepare the GUI and VLC instance for playback.
         """
 
-        arguments = [
-            "--video-title-show",
-            "--video-title-timeout", "1",
-            "--sub-source marq",
-            "--verbose", "-1"
-        ]
-
-        self.instance = vlc.Instance(" ".join(arguments))
+        self.instance = vlc.Instance()
         self.player = self.instance.media_player_new()
 
         self.player.video_set_deinterlace("blend")
 
-        overlay_time = config.getint("snake", "overlay_time") * 1000
-
         settings = {
             vlc.VideoMarqueeOption.Position: vlc.Position.TopRight,
-            vlc.VideoMarqueeOption.Timeout: overlay_time,
             vlc.VideoMarqueeOption.Size: 16,
             vlc.VideoMarqueeOption.marquee_X: 16,
             vlc.VideoMarqueeOption.marquee_Y: 16
@@ -110,7 +101,7 @@ class Control(QtGui.QWidget):
 
     def pause(self):
         if self._get_state() == "playing":
-            self.overlay("Paused")
+            self.overlay("Paused", forever=True)
 
         else:
             self.overlay("Resumed")
@@ -218,12 +209,19 @@ class Control(QtGui.QWidget):
 
         return self._get_state()
 
-    def overlay(self, text):
+    def overlay(self, text, forever=False):
         """
-        Set a temporary text overlay on the video.
+        Set a text overlay on the video.
         """
 
+        time = self.overlay_time
+
+        if forever:
+            time = 0
+
+        self.player.video_set_marquee_int(vlc.VideoMarqueeOption.Enable, True)
         self.player.video_set_marquee_string(vlc.VideoMarqueeOption.Text, text)
+        self.player.video_set_marquee_int(vlc.VideoMarqueeOption.Timeout, time)
 
     def queue(self, item):
         self._add_to_queue(item)
