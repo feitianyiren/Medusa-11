@@ -4,13 +4,11 @@
 Proxy function calls exposed to Snakes during communication.
 """
 
-from collections import defaultdict
-
 #------------------------------------------------------------------------------
 
 class Proxy(object):
 
-    _snakes = defaultdict()
+    _snakes = {}
 
     def update(self, message):
         snake, status = message

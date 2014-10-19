@@ -2,6 +2,7 @@
 {% block content %}
 
 {% if not snake %}
+
 <div class="adminContent">
     <div class="boxFull">
         <div class="mainContentsBox">
@@ -18,6 +19,27 @@
         </div>
     </div>
 </div>
+
+{% else %}
+
+<div class="boxFull">
+    {% if queued %}
+    <div class="mainContentsBox">
+        <div class="contentsText contentsTitle">
+            Queued
+        </div>
+    </div>
+        {% for item in queued %}
+        <a class="mainContentsBox contentsLink"
+           href="/medusa/media/{{ item[0] }}">
+            <div class="contentsText contentsName">
+                {{ item[1] }}
+            </div>
+        </a>
+        {% endfor %}
+    {% endif %}
+</div>
+
 {% endif %}
 
 {% endblock %}

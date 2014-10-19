@@ -234,6 +234,16 @@ def viewed():
 @pages.route("/admin")
 @pages.route("/admin/<snake>")
 def admin(snake=None):
+    queued = []
+
+    for key, value in Proxy._snakes.items():
+        if key != snake:
+            continue
+
+        for item in value.get("queue", []):
+            queued.append(item)
+
     return flask.render_template("admin.html",
                                  page="admin",
-                                 snake=snake)
+                                 snake=snake,
+                                 queued=queued)
