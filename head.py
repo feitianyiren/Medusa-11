@@ -25,6 +25,12 @@ URL_BASE = config.get("head", "url_base")
 
 #------------------------------------------------------------------------------
 
+Index()
+
+Communicate(proxy=Proxy)
+
+#------------------------------------------------------------------------------
+
 app = flask.Flask(__name__,
                   template_folder="%s/templates" % PATH,
                   static_folder="%s/static" % PATH,
@@ -41,20 +47,11 @@ def root():
 
 #------------------------------------------------------------------------------
 
-def main():
-    Index()
-
-    Communicate(proxy=Proxy)
-
-    app.run(host="0.0.0.0", port=config.getint("ports", "head"))
-
-#------------------------------------------------------------------------------
-
 if __name__ == "__main__":
     try:
         log.warn("Head initialised")
 
-        main()
+        app.run(host="0.0.0.0", port=config.getint("ports", "head"))
 
     finally:
         log.warn("Head exited")
