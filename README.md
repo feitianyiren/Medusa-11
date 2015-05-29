@@ -8,7 +8,5 @@ Medusa is a simple and fast home theatre solution. Through a single web interfac
 Interface
 -----------
 
-http://i.imgur.com/Ib1LIIh.jpg
-http://i.imgur.com/qByo5kQ.jpg
-
 ![Interface 1](http://i.imgur.com/Ib1LIIh.jpg)
+![Interface 2](http://i.imgur.com/qByo5kQ.jpg)
