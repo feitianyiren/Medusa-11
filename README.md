@@ -9,4 +9,4 @@ Interface
 -----------
 
 ![Interface 1](http://i.imgur.com/I9yJZAG.jpg)
-![Interface 2](http://i.imgur.com/wqMshKZ.jpg)
+![Interface 2](http://i.imgur.com/keV9U11.jpg)
